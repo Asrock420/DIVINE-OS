@@ -1,5 +1,5 @@
 // ✅ তোমার Google Script Web App URL এখানে বসাও
-const API_URL = "https://script.google.com/macros/s/AKfycbxQvblN6hoWOTQRK6MQ7To0xeqVjvN3NX8NWRM6eHmjkDHVhoWM9ABMd52Jy0ysgcIz/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbylUU1CJ_HLWDovaxnG8GbVqRDQXDGHwixA9Qx0vsm83uxF5LbVX3QBlHgTr63akdm2/exec";
 
 let CURRENT_USER = null;
 
@@ -7,12 +7,12 @@ let CURRENT_USER = null;
 const PERMISSIONS = {
     "Executive Management": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "admin"],
     "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "admin"],
-    "Sales Department": ["dashboard", "crm", "bookings", "commission"],
+    "Sales Department": ["dashboard", "crm", "bookings", "commission", "hr"], 
     "CR & Accounts": ["dashboard", "bookings", "finance", "commission", "hr"],
     "Admin & HR Logistic": ["dashboard", "hr", "admin"],
     "Marketing Department": ["dashboard", "marketing"],
     "Operations": ["dashboard", "operations"],
-    "Office Support": ["dashboard", "hr"] // 👈 এখানে "hr" (Requisition) যোগ করা হয়েছে
+    "Office Support": ["dashboard", "hr"]
 };
 
 // 🏷️ MENU LABELS
@@ -309,4 +309,67 @@ function startTimers() {
             t.innerText = h + "h " + m + "m ago";
         });
     }, 1000); 
+}
+
+/******** BOOKINGS LOGIC ********/
+function getBookings(user, role, dept) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
+  const data = sheet.getDataRange().getValues().slice(1); // Skip header
+  let bookings = [];
+  
+  const isManager = (role === 'CEO' || role === 'Chief System Architect' || dept === 'CR & Accounts');
+  
+  data.forEach(r => {
+      if(r[0]) {
+          if(isManager || r[6] === user) { // Col G (Index 6) is Sold By
+              bookings.push({ id: r[0], leadId: r[1], name: r[2], project: r[3], price: r[4], paid: r[5], agent: r[6], date: new Date(r[7]).toLocaleDateString() });
+          }
+      }
+  });
+  return bookings.reverse();
+}
+
+function getSoldLeads(user, role) {
+   const ss = SpreadsheetApp.getActiveSpreadsheet();
+   const leadSheet = ss.getSheetByName(CONFIG.SHEETS.MASTER);
+   const leads = leadSheet.getDataRange().getValues().slice(1);
+   
+   const bookingSheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
+   const bookedLeads = bookingSheet.getDataRange().getValues().slice(1).map(r => String(r[1])); // Array of already booked Lead IDs
+
+   let soldLeads = [];
+   const isManager = (role === 'CEO' || role === 'Chief System Architect');
+
+   leads.forEach(r => {
+       let lId = String(r[1]); // Lead ID
+       let status = String(r[5]).toLowerCase(); // Status
+       let agent = r[2]; // Assigned To
+       
+       // If status is sold, not already booked, and belongs to user (or is Admin)
+       if(status.includes('sold') && !bookedLeads.includes(lId)) {
+           if(isManager || agent === user) {
+               soldLeads.push({ id: lId, name: r[3], project: r[8] || 'General' });
+           }
+       }
+   });
+   return soldLeads;
+}
+
+function createBooking(data) {
+   const ss = SpreadsheetApp.getActiveSpreadsheet();
+   const sheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
+   const lastRow = sheet.getLastRow() + 1;
+   const bkgId = "BKG-" + new Date().getFullYear() + "-" + (1000 + lastRow);
+   
+   sheet.getRange(lastRow, 1).setValue(bkgId);
+   sheet.getRange(lastRow, 2).setValue(data.leadId);
+   sheet.getRange(lastRow, 3).setValue(data.customerName);
+   sheet.getRange(lastRow, 4).setValue(data.project);
+   sheet.getRange(lastRow, 5).setValue(data.totalPrice);
+   sheet.getRange(lastRow, 6).setValue(data.bookingMoney);
+   sheet.getRange(lastRow, 7).setValue(data.agent);
+   sheet.getRange(lastRow, 8).setValue(new Date());
+   
+   return "✅ Booking successfully created! ID: " + bkgId;
 }
