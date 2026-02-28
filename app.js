@@ -112,31 +112,11 @@ function switchTab(tabId) {
     if(tabId === 'dashboard') loadDashboardTab();
     else if(tabId === 'crm') loadCRMTab();
     else if(tabId === 'admin') loadAdminTab();
-    else if(tabId === 'bookings') loadComingSoonTab("Bookings");
+    else if(tabId === 'bookings') loadBookingsTab(); // 🔥 NEW: Bookings Tab Connected
     else if(tabId === 'finance') loadComingSoonTab("Installments");
     else if(tabId === 'commission') loadComingSoonTab("Commissions");
     else if(tabId === 'hr') loadComingSoonTab("Requisitions & HR");
     else loadComingSoonTab(tabId);
-}
-
-// ----------------------------------------------------
-// TAB RENDERERS
-// ----------------------------------------------------
-
-async function loadDashboardTab() {
-    const appDiv = document.getElementById('app');
-    let html = `
-      <div class="card" style="text-align:center;">
-        <h2 class="header-title">Welcome to Divine OS, ${CURRENT_USER.name}!</h2>
-        <p style="color:#666;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
-      </div>
-      <div class="pie-container">
-        <div class="stat-box"><div class="stat-num" style="color:#0d6efd">--</div>Total Tasks</div>
-        <div class="stat-box"><div class="stat-num" style="color:#198754">--</div>Completed</div>
-        <div class="stat-box"><div class="stat-num" style="color:#dc3545">--</div>Pending</div>
-      </div>
-    `;
-    appDiv.innerHTML = html;
 }
 
 function loadComingSoonTab(moduleName) {
@@ -149,6 +129,192 @@ function loadComingSoonTab(moduleName) {
     `;
 }
 
+// ----------------------------------------------------
+// 🌟 10-POINT CEO DASHBOARD (UI SKELETON)
+// ----------------------------------------------------
+async function loadDashboardTab() {
+    const appDiv = document.getElementById('app');
+    
+    // CEO & Admin Level Dashboard
+    if(CURRENT_USER.department === 'Executive Management' || CURRENT_USER.department === 'System Control') {
+        appDiv.innerHTML = `
+        <div style="padding:10px; animation: fadeIn 0.5s;">
+            <h2 class="header-title" style="text-align:center; color:#0f4c3a;">👑 Executive KPI Dashboard</h2>
+            
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="stat-box" style="flex:1; background:#e8f5e9;"><div class="stat-num" style="color:#198754">0</div>Total Bookings</div>
+                <div class="stat-box" style="flex:1; background:#fff3cd;"><div class="stat-num" style="color:#f39c12">৳ 0</div>Total Revenue</div>
+                <div class="stat-box" style="flex:1; background:#cff4fc;"><div class="stat-num" style="color:#0dcaf0">৳ 0</div>Collection</div>
+                <div class="stat-box" style="flex:1; background:#f8d7da;"><div class="stat-num" style="color:#dc3545">৳ 0</div>Total Due</div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div class="card" style="flex:1; min-width:300px; border-left: 4px solid #198754;">
+                    <h3 class="header-title">💰 Cash Flow Snapshot</h3>
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px;"><span>Opening Balance:</span> <b>৳ 500,000</b></div>
+                    <div style="display:flex; justify-content:space-between; padding-top:5px; color:green;"><span>+ Total Collection:</span> <b>৳ 0</b></div>
+                    <div style="display:flex; justify-content:space-between; color:red;"><span>- Expenses (Requisition):</span> <b>৳ 0</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:18px; font-weight:bold; background:#f4f6f8; padding:5px;"><span>Current Position:</span> <span>৳ 500,000</span></div>
+                </div>
+
+                <div class="card" style="flex:1; min-width:300px; border-left: 4px solid #f1c40f;">
+                    <h3 class="header-title">🧾 Financial & Requisition</h3>
+                    <p>This Month Revenue: <b>৳ 0</b> <span style="color:green; font-size:12px;">(↑ 0% Growth)</span></p>
+                    <p>Pending Requisitions: <b style="color:red; font-size:18px;">0</b></p>
+                    <p>Total Approved Expenses: <b>৳ 0</b></p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:15px;">
+                <div class="card" style="flex:1; min-width:300px; border-left: 4px solid #0d6efd;">
+                    <h3 class="header-title">🏆 Top Sales Performers</h3>
+                    <table class="data-table" style="width:100%; text-align:left;">
+                        <tr><th>Name</th><th>Bookings</th><th>Revenue</th></tr>
+                        <tr><td colspan="3" style="text-align:center; color:#666;">Waiting for booking data...</td></tr>
+                    </table>
+                </div>
+
+                <div class="card" style="flex:1; min-width:300px; border-left: 4px solid #6f42c1;">
+                    <h3 class="header-title">📢 Marketing & ROI</h3>
+                    <p>Total Ad Spend: <b>৳ 0</b></p>
+                    <p>Leads Generated: <b>0</b></p>
+                    <p>Cost Per Lead (CPL): <b>৳ 0</b></p>
+                    <p>Overall ROI: <b style="color:green;">0%</b></p>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top:15px; background:#fff5f5; border:1px solid #dc3545;">
+                <h3 class="header-title" style="color:#dc3545;">⚠️ Risk Zone & Today's Snapshot</h3>
+                <p><b>Today:</b> 0 Leads | 0 Bookings | ৳ 0 Collection</p>
+                <p style="color:#dc3545;"><b>Overdue Installments:</b> 0 Clients</p>
+            </div>
+        </div>`;
+    } else {
+        // Normal User Dashboard
+        appDiv.innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2 class="header-title">Welcome to Divine OS, ${CURRENT_USER.name}!</h2>
+            <p style="color:#666;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+          </div>
+          <div class="pie-container">
+            <div class="stat-box"><div class="stat-num" style="color:#0d6efd">0</div>Assigned Leads</div>
+            <div class="stat-box"><div class="stat-num" style="color:#198754">0</div>My Bookings</div>
+            <div class="stat-box"><div class="stat-num" style="color:#f39c12">0</div>Pending Tasks</div>
+          </div>
+        `;
+    }
+}
+
+// ----------------------------------------------------
+// 📝 BOOKINGS MODULE FRONTEND
+// ----------------------------------------------------
+async function loadBookingsTab() {
+    const appDiv = document.getElementById('app');
+    appDiv.innerHTML = `<h3 style="text-align:center; padding:30px; color:#0f4c3a;">Fetching Bookings...</h3>`;
+    
+    const bookings = await apiCall('getBookings', { user: CURRENT_USER.name, role: CURRENT_USER.role, dept: CURRENT_USER.department });
+    if(!bookings) return;
+
+    let html = `
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h3 class="header-title" style="margin:0;">📝 Bookings Management</h3>
+        ${(CURRENT_USER.department === 'Sales Department' || CURRENT_USER.role === 'CEO' || CURRENT_USER.role === 'Chief System Architect') 
+          ? `<button class="btn btn-green" onclick="openBookingModal()">+ Add New Booking</button>` : ''}
+    </div>
+    
+    <div class="card desktop-table">
+        <table>
+            <thead><tr><th>Booking ID</th><th>Customer</th><th>Project</th><th>Total Price</th><th>Booking Money</th><th>Agent</th><th>Date</th></tr></thead>
+            <tbody>`;
+    
+    if(bookings.length > 0) {
+        bookings.forEach(b => {
+            html += `<tr><td><b>${b.id}</b><br><small>${b.leadId}</small></td><td>${b.name}</td><td>${b.project}</td><td>৳ ${b.price}</td><td style="color:green; font-weight:bold;">৳ ${b.paid}</td><td>${b.agent}</td><td>${b.date}</td></tr>`;
+        });
+    } else {
+        html += `<tr><td colspan="7" style="text-align:center;">No bookings found. Try converting a lead to 'Sold' first!</td></tr>`;
+    }
+    html += `</tbody></table></div>`;
+    
+    // Add Booking Modal
+    html += `
+    <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="margin:50px auto; max-width:500px; border-top: 4px solid #198754;">
+            <h3 class="header-title">Create New Booking</h3>
+            <p style="font-size:12px; color:#666;">Note: Only leads marked as 'Sold' appear here.</p>
+            
+            <label>Select Sold Lead</label>
+            <select id="b_lead" onchange="autoFillBooking()"><option value="">Loading leads...</option></select>
+            
+            <input type="hidden" id="b_name">
+            <input type="hidden" id="b_project">
+            
+            <label>Total Price (Tk)</label>
+            <input type="number" id="b_price" placeholder="e.g. 5000000">
+            
+            <label>Booking Money Received (Tk)</label>
+            <input type="number" id="b_paid" placeholder="e.g. 200000">
+            
+            <button class="btn btn-green" style="width:100%; margin-bottom:10px; margin-top:10px;" onclick="submitBooking()">Submit Booking</button> 
+            <button class="btn btn-red" style="width:100%;" onclick="closeBookingModal()">Cancel</button>
+        </div>
+    </div>`;
+    
+    appDiv.innerHTML = html;
+}
+
+let currentSoldLeads = [];
+
+async function openBookingModal() {
+    document.getElementById('bookingModal').style.display = 'block';
+    document.getElementById('b_lead').innerHTML = '<option>Loading...</option>';
+    
+    currentSoldLeads = await apiCall('getSoldLeads', { user: CURRENT_USER.name, role: CURRENT_USER.role });
+    
+    let opts = '<option value="">-- Select a Lead --</option>';
+    if(currentSoldLeads && currentSoldLeads.length > 0) {
+        currentSoldLeads.forEach(l => {
+            opts += `<option value="${l.id}">${l.name} (${l.project})</option>`;
+        });
+    } else {
+        opts = '<option value="">❌ No pending sold leads found.</option>';
+    }
+    document.getElementById('b_lead').innerHTML = opts;
+}
+
+function autoFillBooking() {
+    let selectedId = document.getElementById('b_lead').value;
+    let lead = currentSoldLeads.find(l => l.id === selectedId);
+    if(lead) {
+        document.getElementById('b_name').value = lead.name;
+        document.getElementById('b_project').value = lead.project;
+    }
+}
+
+function closeBookingModal() { document.getElementById('bookingModal').style.display = 'none'; }
+
+async function submitBooking() {
+    let leadId = document.getElementById('b_lead').value;
+    let price = document.getElementById('b_price').value;
+    let paid = document.getElementById('b_paid').value;
+    let name = document.getElementById('b_name').value;
+    let project = document.getElementById('b_project').value;
+    
+    if(!leadId || !price || !paid) return alert("Please fill all fields.");
+    
+    document.querySelector('#bookingModal .btn-green').innerText = "Processing...";
+    
+    let payload = { leadId: leadId, customerName: name, project: project, totalPrice: price, bookingMoney: paid, agent: CURRENT_USER.name };
+    
+    let res = await apiCall('createBooking', { data: payload });
+    showToast(res);
+    closeBookingModal();
+    loadBookingsTab(); 
+}
+
+// ----------------------------------------------------
+// OLD CRM & ADMIN RENDERERS (UNTOUCHED)
+// ----------------------------------------------------
 async function loadCRMTab() {
     const appDiv = document.getElementById('app');
     if(CURRENT_USER.department === 'Executive Management' || CURRENT_USER.department === 'System Control') {
@@ -187,7 +353,6 @@ async function loadAdminTab() {
     `;
     document.getElementById('app').innerHTML = html;
 
-    // Render Agents list
     let cAgentOpts = '<option value="Round Robin">🔄 Round Robin</option>';
     let agHtml = '<table><tr><th>Name</th><th>Department</th><th>Role</th><th>Status</th><th>Action</th></tr>';
     
@@ -203,7 +368,6 @@ async function loadAdminTab() {
     document.getElementById('cAgent').innerHTML = cAgentOpts;
 }
 
-// --- CRM RENDERERS ---
 function renderSalesCRM(data) {
     if(data.status === 'Blocked') { document.getElementById('app').innerHTML = '<h2 style="color:red;text-align:center;">🚫 BLOCKED</h2>'; return; }
     
@@ -225,7 +389,6 @@ function renderAdminCRM(data) {
     }
     stHtml += '</tbody></table></div>';
     
-    // Rejected Leads Re-assign UI
     stHtml += `<div class="card"><h3 class="header-title">♻️ Rejected Leads Re-assign</h3><div style="max-height:300px; overflow-y:auto;"><table class="data-table"><thead><tr><th>Name</th><th>Phone</th><th>Old Agent</th><th>Re-assign To</th></tr></thead><tbody>`;
     if(data.rejected.length > 0) {
         let teamOpts = '<option value="">Select Agent...</option>';
@@ -309,67 +472,4 @@ function startTimers() {
             t.innerText = h + "h " + m + "m ago";
         });
     }, 1000); 
-}
-
-/******** BOOKINGS LOGIC ********/
-function getBookings(user, role, dept) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
-  const data = sheet.getDataRange().getValues().slice(1); // Skip header
-  let bookings = [];
-  
-  const isManager = (role === 'CEO' || role === 'Chief System Architect' || dept === 'CR & Accounts');
-  
-  data.forEach(r => {
-      if(r[0]) {
-          if(isManager || r[6] === user) { // Col G (Index 6) is Sold By
-              bookings.push({ id: r[0], leadId: r[1], name: r[2], project: r[3], price: r[4], paid: r[5], agent: r[6], date: new Date(r[7]).toLocaleDateString() });
-          }
-      }
-  });
-  return bookings.reverse();
-}
-
-function getSoldLeads(user, role) {
-   const ss = SpreadsheetApp.getActiveSpreadsheet();
-   const leadSheet = ss.getSheetByName(CONFIG.SHEETS.MASTER);
-   const leads = leadSheet.getDataRange().getValues().slice(1);
-   
-   const bookingSheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
-   const bookedLeads = bookingSheet.getDataRange().getValues().slice(1).map(r => String(r[1])); // Array of already booked Lead IDs
-
-   let soldLeads = [];
-   const isManager = (role === 'CEO' || role === 'Chief System Architect');
-
-   leads.forEach(r => {
-       let lId = String(r[1]); // Lead ID
-       let status = String(r[5]).toLowerCase(); // Status
-       let agent = r[2]; // Assigned To
-       
-       // If status is sold, not already booked, and belongs to user (or is Admin)
-       if(status.includes('sold') && !bookedLeads.includes(lId)) {
-           if(isManager || agent === user) {
-               soldLeads.push({ id: lId, name: r[3], project: r[8] || 'General' });
-           }
-       }
-   });
-   return soldLeads;
-}
-
-function createBooking(data) {
-   const ss = SpreadsheetApp.getActiveSpreadsheet();
-   const sheet = ss.getSheetByName(CONFIG.SHEETS.BOOKINGS);
-   const lastRow = sheet.getLastRow() + 1;
-   const bkgId = "BKG-" + new Date().getFullYear() + "-" + (1000 + lastRow);
-   
-   sheet.getRange(lastRow, 1).setValue(bkgId);
-   sheet.getRange(lastRow, 2).setValue(data.leadId);
-   sheet.getRange(lastRow, 3).setValue(data.customerName);
-   sheet.getRange(lastRow, 4).setValue(data.project);
-   sheet.getRange(lastRow, 5).setValue(data.totalPrice);
-   sheet.getRange(lastRow, 6).setValue(data.bookingMoney);
-   sheet.getRange(lastRow, 7).setValue(data.agent);
-   sheet.getRange(lastRow, 8).setValue(new Date());
-   
-   return "✅ Booking successfully created! ID: " + bkgId;
 }
