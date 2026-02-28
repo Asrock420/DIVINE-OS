@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine OS Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toast" style="visibility:hidden; position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#0f4c3a; color:#f1c40f; font-weight:bold; padding:12px 25px; border-radius:30px; z-index:1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2);"></div>
+
+    <audio id="azaanAudio" src="https://www.islamcan.com/audio/adhan/azan1.mp3" preload="auto"></audio>
+
+    <div id="app">
+        <h2 style="text-align:center; padding: 50px;">Loading Dashboard...</h2>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Init dashboard based on logged in user
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('divineUser'));
+            if (!user) window.location.href = 'index.html';
+            else if (user.role === 'Admin' || user.role === 'Boss') loadAdminDashboard(user.name, user.role);
+            else loadSalesmanDashboard(user.name);
+        };
+    </script>
+</body>
+</html>
