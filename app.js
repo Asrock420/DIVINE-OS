@@ -1,5 +1,5 @@
 // ✅ তোমার Google Script Web App URL এখানে বসাও
-const API_URL = "https://script.google.com/macros/s/AKfycbwIx16ICpQeAd0d72Jk0YRWJwq3mSoP1vS5yaaCcbcbIMR0Kfafr9ZlGRI0QokuVeyr/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwFwyiqgG2QJa0vNdgfEmJM0KFdfziScTLXXD_Fj8JY5INXDPOXq9JdRowqqFh4rC6G/exec";
 
 let CURRENT_USER = null;
 
@@ -29,7 +29,7 @@ const TAB_NAMES = {
     "admin": "⚙️ Admin Control"
 };
 
-// --- CSS Injector for Kanban Board ---
+// --- CSS Injector for Kanban Board & Print Voucher ---
 document.head.insertAdjacentHTML("beforeend", `
 <style>
 .kanban-board { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
@@ -38,6 +38,17 @@ document.head.insertAdjacentHTML("beforeend", `
 .kanban-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 13px; }
 .k-red { border-left: 5px solid #dc3545; } .k-yellow { border-left: 5px solid #f1c40f; } .k-green { border-left: 5px solid #198754; } .k-gray { border-left: 5px solid #6c757d; }
 .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+
+/* Voucher Print Styles */
+@media print {
+    body * { visibility: hidden; }
+    #printVoucherArea, #printVoucherArea * { visibility: visible; }
+    #printVoucherArea { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+    .no-print { display: none !important; }
+}
+.voucher-box { border: 2px solid #0f4c3a; padding: 30px; background: white; font-family: Arial, sans-serif; color: black; max-width: 800px; margin: auto; }
+.voucher-header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f4c3a; padding-bottom: 10px; margin-bottom: 20px; }
+.sign-box { border-top: 1px solid #000; width: 150px; text-align: center; margin-top: 50px; font-size: 12px; font-weight: bold; }
 </style>`);
 
 function showToast(msg) { 
@@ -328,7 +339,7 @@ async function submitBooking() {
 }
 
 // ----------------------------------------------------
-// 🌟 SALES CRM (NOW WITH KANBAN) & ADMIN RENDERERS
+// 🌟 SALES CRM (KANBAN BOARD - UNTOUCHED)
 // ----------------------------------------------------
 async function loadCRMTab() {
     const appDiv = document.getElementById('app');
@@ -337,7 +348,7 @@ async function loadCRMTab() {
         if(rawData) renderAdminCRM(JSON.parse(rawData));
     } else {
         const rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
-        if(rawData) renderSalesKanban(JSON.parse(rawData)); // 🔥 Calling Kanban Instead of Table
+        if(rawData) renderSalesKanban(JSON.parse(rawData)); 
     }
 }
 
@@ -376,7 +387,6 @@ function renderSalesKanban(data) {
     }
     html += `</div>`;
     
-    // Inject enhanced Modal
     html += `
     <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
         <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #0d6efd;">
@@ -403,7 +413,6 @@ function renderSalesKanban(data) {
     document.getElementById('app').innerHTML = html;
 }
 
-// Kanban Modal Logics
 async function openKanbanModal(id, status, date, rem, erp) {
     document.getElementById('lid').value = id; 
     document.getElementById('st').value = status;
@@ -412,7 +421,6 @@ async function openKanbanModal(id, status, date, rem, erp) {
     document.getElementById('erp').value = erp; 
     document.getElementById('modal').style.display = 'block';
     
-    // Load History
     document.getElementById('his').innerHTML = "Loading history...";
     const h = await apiCall('getHistory', { id: id });
     if(h) document.getElementById('his').innerHTML = h.map(x => `<b>${x.date}</b>: ${x.status} - ${x.note}`).join('<br>');
@@ -432,12 +440,14 @@ async function saveLead() {
 }
 
 // ----------------------------------------------------
-// 🧾 REQUISITION MODULE (4-LEVEL APPROVAL)
+// 🧾 🔥 REQUISITION MODULE (DYNAMIC FORM + PRINT VOUCHER)
 // ----------------------------------------------------
+let allRequisitions = [];
+
 async function loadHRTab() {
     const appDiv = document.getElementById('app');
     appDiv.innerHTML = `<h3 style="text-align:center; padding:30px;">Loading Requisitions...</h3>`;
-    const reqs = await apiCall('getRequisitions');
+    allRequisitions = await apiCall('getRequisitions') || [];
     
     let isTL = CURRENT_USER.role.includes('Team Leader');
     let isAdmin = CURRENT_USER.department === 'System Control' || CURRENT_USER.department === 'Admin & HR Logistic';
@@ -447,30 +457,39 @@ async function loadHRTab() {
     let html = `
     <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; border-top: 4px solid #dc3545;">
         <h3 class="header-title" style="margin:0;">🧾 Expense & Requisitions</h3>
-        <button class="btn btn-red" onclick="document.getElementById('reqModal').style.display='block'">+ Create Requisition</button>
+        <button class="btn btn-red" onclick="openReqModal()">+ Create Requisition</button>
     </div>
     
     <div class="card desktop-table">
         <table style="font-size:12px;">
-            <thead><tr><th>ID & Date</th><th>Requested By</th><th>Amount</th><th>Purpose</th><th>TL Auth</th><th>Admin Auth</th><th>CEO Auth</th><th>Accounts</th><th>Status</th></tr></thead>
+            <thead><tr><th>ID & Date</th><th>Requested By</th><th>Amount & Type</th><th>Purpose & Attach</th><th>TL Auth</th><th>Admin Auth</th><th>CEO Auth</th><th>Accounts</th><th>Final Status</th></tr></thead>
             <tbody>`;
             
-    if(reqs && reqs.length > 0) {
-        reqs.forEach(r => {
+    if(allRequisitions.length > 0) {
+        allRequisitions.forEach(r => {
             if(!isCEO && !isAdmin && !isAccounts && !isTL && r.user !== CURRENT_USER.name) return;
             if(isTL && r.dept !== CURRENT_USER.department && r.user !== CURRENT_USER.name) return;
 
             let btnHtml = "";
+            
+            // Workflow Actions
             if(isTL && r.tlApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'TL')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'TL')">Reject</button>`;
-            else if(isAdmin && r.tlApp === 'Approved' && r.adminApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Admin')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'Admin')">Reject</button>`;
+            else if(isAdmin && (r.tlApp === 'Approved' || r.tlApp === 'N/A') && r.adminApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Admin')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'Admin')">Reject</button>`;
             else if(isCEO && r.adminApp === 'Approved' && r.ceoApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'CEO')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'CEO')">Reject</button>`;
-            else if(isAccounts && r.ceoApp === 'Approved' && r.accApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Accounts')">Pay Now</button>`;
+            else if(isAccounts && r.ceoApp === 'Approved' && r.accApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Accounts')">Approve/Pay</button>`;
+            
+            // Print Voucher Action for Accounts & Requester
+            if(r.finalStatus.includes('Logistic 🟢') && (isAccounts || r.user === CURRENT_USER.name)) {
+                btnHtml += `<br><button class="btn btn-blue btn-sm" style="margin-top:5px;" onclick="printVoucher('${r.id}')">🖨️ Print Voucher</button>`;
+            }
+
+            let attachLink = r.attachment ? `<a href="${r.attachment}" target="_blank" style="color:blue;">📎 View Bill</a>` : '<small style="color:gray;">No Attach</small>';
 
             html += `<tr>
                 <td><b>${r.id}</b><br><small>${r.date}</small></td>
                 <td><b>${r.user}</b><br><small>${r.dept}</small></td>
-                <td style="color:red; font-weight:bold;">৳ ${r.amount}</td>
-                <td>${r.purpose}</td>
+                <td><b style="color:red; font-size:14px;">৳ ${r.amount}</b><br><small>${r.reqType}</small></td>
+                <td>${r.purpose}<br>${attachLink}</td>
                 <td><span class="badge ${r.tlApp==='Approved'?'k-green':r.tlApp==='Rejected'?'k-red':'k-yellow'}">${r.tlApp}</span></td>
                 <td><span class="badge ${r.adminApp==='Approved'?'k-green':r.adminApp==='Rejected'?'k-red':'k-yellow'}">${r.adminApp}</span></td>
                 <td><span class="badge ${r.ceoApp==='Approved'?'k-green':r.ceoApp==='Rejected'?'k-red':'k-yellow'}">${r.ceoApp}</span></td>
@@ -482,27 +501,81 @@ async function loadHRTab() {
     
     html += `</tbody></table></div>`;
 
-    // Create Modal
+    // Dynamic Form Modal
     html += `
     <div id="reqModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
-        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #dc3545;">
+        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #dc3545; max-height:80vh; overflow-y:auto;">
             <h3 class="header-title">Create Requisition</h3>
-            <label>Amount Needed (Tk)</label><input type="number" id="rqAmt" placeholder="e.g. 5000">
-            <label>Purpose / Details</label><input type="text" id="rqPur" placeholder="e.g. Office Stationery">
+            
+            <label>Requisition Type (Based on Dept)</label>
+            <select id="rqType"></select>
+            
+            <label>Amount Needed (Tk)</label>
+            <input type="number" id="rqAmt" placeholder="e.g. 5000">
+            
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1">
+                    <label>Expense Category</label>
+                    <select id="rqCat">
+                        <option>Travel & Transport</option><option>Office Supply</option>
+                        <option>Marketing</option><option>Legal & Bank</option>
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <label>Payment Mode</label>
+                    <select id="rqMode"><option>Cash</option><option>Bank Transfer</option><option>Advance</option></select>
+                </div>
+            </div>
+
+            <label>Purpose / Details</label>
+            <input type="text" id="rqPur" placeholder="Detail explanation">
+            
+            <label>Attachment (Bill Photo / Drive Link)</label>
+            <input type="text" id="rqAtt" placeholder="Paste Image/Drive URL here (Optional)">
+
             <button class="btn btn-red" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="submitReq()">Submit Requisition</button> 
             <button class="btn btn-gray" style="width:100%;" onclick="document.getElementById('reqModal').style.display='none'">Cancel</button>
         </div>
-    </div>`;
+    </div>
+    
+    <div id="printVoucherArea" style="display:none;"></div>
+    `;
     appDiv.innerHTML = html;
 }
 
+function openReqModal() {
+    let dept = CURRENT_USER.department;
+    let opts = "";
+    if(dept === 'Sales Department') opts = "<option>Conveyance</option><option>Mobile Bill</option><option>Client Meeting Expense</option><option>Site Visit Expense</option>";
+    else if(dept === 'Marketing Department') opts = "<option>Campaign Boost</option><option>Video Shoot Cost</option><option>Designer Cost</option><option>Software Subscription</option>";
+    else if(dept === 'CR & Accounts') opts = "<option>Bank Charges</option><option>Document Processing</option><option>Stamp / Legal Fees</option>";
+    else if(dept === 'Admin & HR Logistic') opts = "<option>Office Desk / Chair</option><option>Printer & Supply</option><option>Internet Bill</option><option>Electricity</option>";
+    else opts = "<option>Stationary</option><option>Cleaning Supplies</option><option>Minor Repair</option><option>General Utility</option>";
+    
+    document.getElementById('rqType').innerHTML = opts;
+    document.getElementById('reqModal').style.display = 'block';
+}
+
 async function submitReq() {
-    let amt = document.getElementById('rqAmt').value; let pur = document.getElementById('rqPur').value;
-    if(!amt || !pur) return alert("Please fill all fields!");
+    let type = document.getElementById('rqType').value;
+    let amt = document.getElementById('rqAmt').value; 
+    let cat = document.getElementById('rqCat').value;
+    let mode = document.getElementById('rqMode').value;
+    let pur = document.getElementById('rqPur').value;
+    let att = document.getElementById('rqAtt').value;
+
+    if(!amt || !pur) return alert("Amount and Purpose are mandatory!");
     document.querySelector('#reqModal .btn-red').innerText = "Submitting...";
-    let res = await apiCall('createRequisition', { data: { user: CURRENT_USER.name, dept: CURRENT_USER.department, amount: amt, purpose: pur } });
+    
+    let reqData = { 
+        user: CURRENT_USER.name, dept: CURRENT_USER.department, 
+        amount: amt, reqType: type, category: cat, payMode: mode, purpose: pur, attachment: att 
+    };
+    
+    let res = await apiCall('createRequisition', { data: reqData });
     showToast(res); document.getElementById('reqModal').style.display='none'; loadHRTab();
 }
+
 async function approveReq(id, level) {
     if(confirm(`Approve requisition at ${level} level?`)) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Approved' } });
@@ -514,6 +587,62 @@ async function rejectReq(id, level) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Rejected' } });
         showToast(res); loadHRTab();
     }
+}
+
+// 🖨️ PDF Cash Voucher Print Logic
+function printVoucher(reqId) {
+    let req = allRequisitions.find(r => r.id === reqId);
+    if(!req) return;
+
+    let printHtml = `
+    <div class="voucher-box">
+        <div class="voucher-header">
+            <div>
+                <img src="https://divinegroupbd.net/images/divine-group-logo.png" width="150" alt="Divine Group">
+                <h3 style="margin:5px 0 0 0; color:#0f4c3a;">Cash / Payment Voucher</h3>
+            </div>
+            <div style="text-align:right;">
+                <b>Voucher No:</b> ${req.id}<br>
+                <b>Date:</b> ${new Date().toLocaleDateString()}<br>
+                <b>Status:</b> APPROVED ✅
+            </div>
+        </div>
+        
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;" border="1" cellpadding="8">
+            <tr><td width="30%"><b>Requested By:</b></td><td>${req.user} (${req.dept})</td></tr>
+            <tr><td><b>Expense Category:</b></td><td>${req.category} - ${req.reqType}</td></tr>
+            <tr><td><b>Purpose:</b></td><td>${req.purpose}</td></tr>
+            <tr><td><b>Payment Mode:</b></td><td>${req.payMode}</td></tr>
+            <tr><td><b>Amount Approved:</b></td><td style="font-size:18px;"><b>৳ ${req.amount} /_</b></td></tr>
+        </table>
+
+        <div style="background:#f4f6f8; padding:10px; border:1px solid #ccc; margin-bottom:30px; font-size:12px;">
+            <b>Digital Audit Trail:</b><br>
+            ✓ TL Approval: <b>${req.tlApp}</b><br>
+            ✓ Admin Approval: <b>${req.adminApp}</b><br>
+            ✓ CEO Approval: <b>${req.ceoApp}</b><br>
+            ✓ Accounts Processing: <b>${req.accApp}</b>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:60px;">
+            <div class="sign-box">Prepared By<br>(System Auto)</div>
+            <div class="sign-box">Accounts Manager<br>(Signature)</div>
+            <div class="sign-box">Receiver's Signature<br>(Sign Here)</div>
+        </div>
+        
+        <p style="text-align:center; font-size:10px; color:#666; margin-top:30px;">This is a system generated document. Powered by Divine OS.</p>
+    </div>
+    `;
+
+    document.getElementById('printVoucherArea').innerHTML = printHtml;
+    
+    // Auto Update Status in background to "Paid & Printed"
+    if(CURRENT_USER.department === 'CR & Accounts') {
+        apiCall('markVoucherPrinted', { id: reqId });
+    }
+
+    window.print();
+    setTimeout(() => { loadHRTab(); }, 2000); // Reload after print
 }
 
 // ----------------------------------------------------
