@@ -3,14 +3,14 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwFwyiqgG2QJa0vNdgfEmJM
 
 let CURRENT_USER = null;
 
-// 🛡️ THE MASTER PERMISSION MATRIX (RBAC)
+// 🛡️ THE MASTER PERMISSION MATRIX (RBAC) - 🔥 Updated Marketing Permission
 const PERMISSIONS = {
     "Executive Management": ["dashboard", "hr", "reports"], 
     "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "reports", "admin"],
     "Sales Department": ["dashboard", "crm", "bookings", "commission", "hr", "reports"], 
     "CR & Accounts": ["dashboard", "bookings", "finance", "commission", "hr", "reports"],
-    "Admin & HR Logistic": ["dashboard", "hr", "reports", "admin"],
-    "Marketing Department": ["dashboard", "marketing", "reports"],
+    "Admin & HR Logistic": ["dashboard", "hr", "reports",],
+    "Marketing Department": ["dashboard", "marketing", "reports", "hr"], // 🔥 "hr" added here
     "Operations": ["dashboard", "operations", "reports"],
     "Office Support": ["dashboard", "hr"]
 };
@@ -478,9 +478,9 @@ async function loadHRTab() {
             else if(isCEO && r.adminApp === 'Approved' && r.ceoApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'CEO')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'CEO')">Reject</button>`;
             else if(isAccounts && r.ceoApp === 'Approved' && r.accApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Accounts')">Approve/Pay</button>`;
             
-            // Print Voucher Action for Accounts & Requester
-            if(r.finalStatus.includes('Logistic 🟢') && (isAccounts || r.user === CURRENT_USER.name)) {
-                btnHtml += `<br><button class="btn btn-blue btn-sm" style="margin-top:5px;" onclick="printVoucher('${r.id}')">🖨️ Print Voucher</button>`;
+            // 🔥 Updated: Print Voucher Button Logic (Always visible after approval for relevant users)
+            if((r.finalStatus.includes('Logistic 🟢') || r.finalStatus.includes('Printed ✅')) && (isAccounts || r.user === CURRENT_USER.name || isCEO || isAdmin)) {
+                btnHtml += `<br><button class="btn btn-blue btn-sm" style="margin-top:5px;" onclick="printVoucher('${r.id}')">🖨️ View & Print Voucher</button>`;
             }
 
             let attachLink = r.attachment ? `<a href="${r.attachment}" target="_blank" style="color:blue;">📎 View Bill</a>` : '<small style="color:gray;">No Attach</small>';
@@ -589,60 +589,101 @@ async function rejectReq(id, level) {
     }
 }
 
-// 🖨️ PDF Cash Voucher Print Logic
+// 🖨️ 🔥 UPDATED: PDF Cash Voucher Print Logic (Professional Pad Design)
 function printVoucher(reqId) {
     let req = allRequisitions.find(r => r.id === reqId);
     if(!req) return;
 
-    let printHtml = `
-    <div class="voucher-box">
-        <div class="voucher-header">
-            <div>
-                <img src="https://divinegroupbd.net/images/divine-group-logo.png" width="150" alt="Divine Group">
-                <h3 style="margin:5px 0 0 0; color:#0f4c3a;">Cash / Payment Voucher</h3>
+    // HTML for the New Window
+    let printContent = `
+    <html>
+    <head>
+        <title>Divine Group Voucher - ${req.id}</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+            .pad-container { max-width: 800px; margin: 0 auto; border: 2px solid #0f4c3a; padding: 40px; position: relative; background: #fff; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0f4c3a; padding-bottom: 15px; margin-bottom: 30px; }
+            .stamp { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: #28a745; border: 4px solid #28a745; font-size: 35px; font-weight: bold; padding: 15px; border-radius: 10px; opacity: 0.2; pointer-events: none; text-transform: uppercase; letter-spacing: 2px; }
+            .info-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 15px; }
+            .info-table td { padding: 12px; border: 1px solid #ddd; }
+            .sign-area { display: flex; justify-content: space-between; margin-top: 80px; }
+            .sign-box { text-align: center; font-size: 14px; width: 30%; }
+            .sign-line { border-top: 1px solid #000; margin-bottom: 5px; font-weight: bold; padding-top: 5px; }
+            .digital-sign { font-family: 'Brush Script MT', cursive, Georgia, sans-serif; font-size: 24px; color: #0f4c3a; margin-bottom: 2px; }
+            .audit-trail { background: #f8f9fa; padding: 15px; border-radius: 5px; font-size: 13px; color: #555; line-height: 1.6; }
+        </style>
+    </head>
+    <body>
+        <div class="pad-container">
+            <div class="stamp">Approved & Verified</div>
+
+            <div class="header">
+                <div>
+                    <img src="https://divinegroupbd.net/images/divine-group-logo.png" width="180" alt="Divine Group">
+                    <h2 style="margin: 8px 0 0 0; color: #0f4c3a; font-size: 22px;">Cash / Payment Voucher</h2>
+                </div>
+                <div style="text-align: right; font-size: 14px; line-height: 1.5;">
+                    <b>Voucher No:</b> ${req.id}<br>
+                    <b>Issue Date:</b> ${new Date().toLocaleDateString()}<br>
+                    <b style="color:#198754; border: 1px solid #198754; padding: 2px 5px; border-radius: 4px;">Status: PAID ✅</b>
+                </div>
             </div>
-            <div style="text-align:right;">
-                <b>Voucher No:</b> ${req.id}<br>
-                <b>Date:</b> ${new Date().toLocaleDateString()}<br>
-                <b>Status:</b> APPROVED ✅
+
+            <table class="info-table">
+                <tr><td width="30%"><b>Requested By:</b></td><td><b>${req.user}</b> <span style="color:#666;">(${req.dept})</span></td></tr>
+                <tr><td><b>Expense Category:</b></td><td>${req.category} - ${req.reqType}</td></tr>
+                <tr><td><b>Purpose / Details:</b></td><td>${req.purpose}</td></tr>
+                <tr><td><b>Payment Mode:</b></td><td>${req.payMode}</td></tr>
+                <tr style="background:#f4f6f8;"><td><b>Amount Approved:</b></td><td style="font-size:22px; color:#dc3545;"><b>৳ ${req.amount} /_</b></td></tr>
+            </table>
+
+            <div class="audit-trail">
+                <b style="color:#000;">System Audit Trail:</b><br>
+                <span style="color:#198754;">✔</span> Team Leader Auth: <b>${req.tlApp}</b><br>
+                <span style="color:#198754;">✔</span> Admin / HR Auth: <b>${req.adminApp}</b><br>
+                <span style="color:#198754;">✔</span> CEO Final Auth: <b>${req.ceoApp}</b><br>
+                <span style="color:#198754;">✔</span> Accounts Disbursed: <b>${req.accApp}</b>
             </div>
-        </div>
-        
-        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;" border="1" cellpadding="8">
-            <tr><td width="30%"><b>Requested By:</b></td><td>${req.user} (${req.dept})</td></tr>
-            <tr><td><b>Expense Category:</b></td><td>${req.category} - ${req.reqType}</td></tr>
-            <tr><td><b>Purpose:</b></td><td>${req.purpose}</td></tr>
-            <tr><td><b>Payment Mode:</b></td><td>${req.payMode}</td></tr>
-            <tr><td><b>Amount Approved:</b></td><td style="font-size:18px;"><b>৳ ${req.amount} /_</b></td></tr>
-        </table>
 
-        <div style="background:#f4f6f8; padding:10px; border:1px solid #ccc; margin-bottom:30px; font-size:12px;">
-            <b>Digital Audit Trail:</b><br>
-            ✓ TL Approval: <b>${req.tlApp}</b><br>
-            ✓ Admin Approval: <b>${req.adminApp}</b><br>
-            ✓ CEO Approval: <b>${req.ceoApp}</b><br>
-            ✓ Accounts Processing: <b>${req.accApp}</b>
+            <div class="sign-area">
+                <div class="sign-box">
+                    <div class="digital-sign">${req.user}</div>
+                    <div class="sign-line">Prepared By (Requester)</div>
+                </div>
+                <div class="sign-box">
+                    <div class="digital-sign" style="color: #d35400;">System Verified</div>
+                    <div class="sign-line">Authorized Signatory</div>
+                </div>
+                <div class="sign-box">
+                    <br><br><br>
+                    <div class="sign-line">Receiver's Signature (Cash)</div>
+                </div>
+            </div>
+            
+            <p style="text-align:center; font-size:11px; color:#999; margin-top:40px; border-top: 1px dashed #eee; padding-top: 10px;">
+                This is a digitally generated and verified document. Powered by Divine OS.
+            </p>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin-top:60px;">
-            <div class="sign-box">Prepared By<br>(System Auto)</div>
-            <div class="sign-box">Accounts Manager<br>(Signature)</div>
-            <div class="sign-box">Receiver's Signature<br>(Sign Here)</div>
-        </div>
-        
-        <p style="text-align:center; font-size:10px; color:#666; margin-top:30px;">This is a system generated document. Powered by Divine OS.</p>
-    </div>
-    `;
+        <script>
+            // Auto trigger print dialogue when window opens
+            window.onload = function() { 
+                setTimeout(() => { window.print(); }, 500); 
+            }
+        </script>
+    </body>
+    </html>`;
 
-    document.getElementById('printVoucherArea').innerHTML = printHtml;
-    
-    // Auto Update Status in background to "Paid & Printed"
-    if(CURRENT_USER.department === 'CR & Accounts') {
+    // Open in a new popup window to prevent blank screen & CSS issues
+    let printWindow = window.open('', '_blank', 'width=900,height=700');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Update status to "Paid & Printed" silently in background (only if Accounts is printing for the first time)
+    if(CURRENT_USER.department === 'CR & Accounts' && req.finalStatus.includes('Logistic 🟢')) {
         apiCall('markVoucherPrinted', { id: reqId });
+        setTimeout(() => { loadHRTab(); }, 2000); // Reload table
     }
-
-    window.print();
-    setTimeout(() => { loadHRTab(); }, 2000); // Reload after print
 }
 
 // ----------------------------------------------------
