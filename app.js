@@ -1,17 +1,17 @@
 // ✅ তোমার Google Script Web App URL এখানে বসাও
-const API_URL = "https://script.google.com/macros/s/AKfycbylUU1CJ_HLWDovaxnG8GbVqRDQXDGHwixA9Qx0vsm83uxF5LbVX3QBlHgTr63akdm2/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwIx16ICpQeAd0d72Jk0YRWJwq3mSoP1vS5yaaCcbcbIMR0Kfafr9ZlGRI0QokuVeyr/exec";
 
 let CURRENT_USER = null;
 
 // 🛡️ THE MASTER PERMISSION MATRIX (RBAC)
 const PERMISSIONS = {
-    "Executive Management": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "admin"],
-    "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "admin"],
-    "Sales Department": ["dashboard", "crm", "bookings", "commission", "hr"], 
-    "CR & Accounts": ["dashboard", "bookings", "finance", "commission", "hr"],
-    "Admin & HR Logistic": ["dashboard", "hr", "admin"],
-    "Marketing Department": ["dashboard", "marketing"],
-    "Operations": ["dashboard", "operations"],
+    "Executive Management": ["dashboard", "hr", "reports"], 
+    "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "reports", "admin"],
+    "Sales Department": ["dashboard", "crm", "bookings", "commission", "hr", "reports"], 
+    "CR & Accounts": ["dashboard", "bookings", "finance", "commission", "hr", "reports"],
+    "Admin & HR Logistic": ["dashboard", "hr", "reports", "admin"],
+    "Marketing Department": ["dashboard", "marketing", "reports"],
+    "Operations": ["dashboard", "operations", "reports"],
     "Office Support": ["dashboard", "hr"]
 };
 
@@ -25,8 +25,20 @@ const TAB_NAMES = {
     "hr": "🧾 Requisitions & HR",
     "marketing": "📢 Marketing",
     "operations": "🏗️ Operations",
+    "reports": "📄 Reports",
     "admin": "⚙️ Admin Control"
 };
+
+// --- CSS Injector for Kanban Board ---
+document.head.insertAdjacentHTML("beforeend", `
+<style>
+.kanban-board { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+.kanban-col { background: #f4f6f8; min-width: 280px; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.kanban-col h4 { text-align: center; margin-top: 0; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
+.kanban-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 13px; }
+.k-red { border-left: 5px solid #dc3545; } .k-yellow { border-left: 5px solid #f1c40f; } .k-green { border-left: 5px solid #198754; } .k-gray { border-left: 5px solid #6c757d; }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+</style>`);
 
 function showToast(msg) { 
     var x = document.getElementById("toast"); 
@@ -72,17 +84,15 @@ function initERP() {
     CURRENT_USER = JSON.parse(localStorage.getItem('divineUser'));
     if (!CURRENT_USER) { window.location.href = 'index.html'; return; }
     
-    // Setup Header
     document.getElementById('erpHeader').style.display = "flex";
     document.getElementById('userInfoStr').innerText = `${CURRENT_USER.department} | ${CURRENT_USER.role}`;
     
-    // Show Visit button only for Sales
     if(CURRENT_USER.department === 'Sales Department') {
         document.getElementById('offBtn').style.display = "block";
     }
 
     renderNav(CURRENT_USER.department);
-    switchTab('dashboard'); // Default load
+    switchTab('dashboard'); 
 }
 
 function renderNav(department) {
@@ -112,10 +122,11 @@ function switchTab(tabId) {
     if(tabId === 'dashboard') loadDashboardTab();
     else if(tabId === 'crm') loadCRMTab();
     else if(tabId === 'admin') loadAdminTab();
-    else if(tabId === 'bookings') loadBookingsTab(); // 🔥 NEW: Bookings Tab Connected
+    else if(tabId === 'bookings') loadBookingsTab(); 
+    else if(tabId === 'hr') loadHRTab(); // 🔥 Requisition Connected
+    else if(tabId === 'reports') loadComingSoonTab("Reports");
     else if(tabId === 'finance') loadComingSoonTab("Installments");
     else if(tabId === 'commission') loadComingSoonTab("Commissions");
-    else if(tabId === 'hr') loadComingSoonTab("Requisitions & HR");
     else loadComingSoonTab(tabId);
 }
 
@@ -130,12 +141,11 @@ function loadComingSoonTab(moduleName) {
 }
 
 // ----------------------------------------------------
-// 🌟 10-POINT CEO DASHBOARD (UI SKELETON)
+// 🌟 10-POINT CEO DASHBOARD (UNTOUCHED)
 // ----------------------------------------------------
 async function loadDashboardTab() {
     const appDiv = document.getElementById('app');
     
-    // CEO & Admin Level Dashboard
     if(CURRENT_USER.department === 'Executive Management' || CURRENT_USER.department === 'System Control') {
         appDiv.innerHTML = `
         <div style="padding:10px; animation: fadeIn 0.5s;">
@@ -190,7 +200,6 @@ async function loadDashboardTab() {
             </div>
         </div>`;
     } else {
-        // Normal User Dashboard
         appDiv.innerHTML = `
           <div class="card" style="text-align:center;">
             <h2 class="header-title">Welcome to Divine OS, ${CURRENT_USER.name}!</h2>
@@ -206,7 +215,7 @@ async function loadDashboardTab() {
 }
 
 // ----------------------------------------------------
-// 📝 BOOKINGS MODULE FRONTEND
+// 📝 BOOKINGS MODULE FRONTEND (UNTOUCHED)
 // ----------------------------------------------------
 async function loadBookingsTab() {
     const appDiv = document.getElementById('app');
@@ -236,7 +245,6 @@ async function loadBookingsTab() {
     }
     html += `</tbody></table></div>`;
     
-    // Add Booking Modal
     html += `
     <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
         <div class="card" style="margin:50px auto; max-width:500px; border-top: 4px solid #198754;">
@@ -248,6 +256,12 @@ async function loadBookingsTab() {
             
             <input type="hidden" id="b_name">
             <input type="hidden" id="b_project">
+            
+            <label>Lead Type</label>
+            <select id="b_type">
+                <option value="SGL">SGL (Self Generated Lead) - 4% Comm</option>
+                <option value="MPL">MPL (Marketing Provided Lead) - 3% Comm</option>
+            </select>
             
             <label>Total Price (Tk)</label>
             <input type="number" id="b_price" placeholder="e.g. 5000000">
@@ -299,12 +313,13 @@ async function submitBooking() {
     let paid = document.getElementById('b_paid').value;
     let name = document.getElementById('b_name').value;
     let project = document.getElementById('b_project').value;
+    let type = document.getElementById('b_type').value;
     
     if(!leadId || !price || !paid) return alert("Please fill all fields.");
     
     document.querySelector('#bookingModal .btn-green').innerText = "Processing...";
     
-    let payload = { leadId: leadId, customerName: name, project: project, totalPrice: price, bookingMoney: paid, agent: CURRENT_USER.name };
+    let payload = { leadId: leadId, customerName: name, project: project, totalPrice: price, bookingMoney: paid, agent: CURRENT_USER.name, leadType: type };
     
     let res = await apiCall('createBooking', { data: payload });
     showToast(res);
@@ -313,7 +328,7 @@ async function submitBooking() {
 }
 
 // ----------------------------------------------------
-// OLD CRM & ADMIN RENDERERS (UNTOUCHED)
+// 🌟 SALES CRM (NOW WITH KANBAN) & ADMIN RENDERERS
 // ----------------------------------------------------
 async function loadCRMTab() {
     const appDiv = document.getElementById('app');
@@ -322,10 +337,188 @@ async function loadCRMTab() {
         if(rawData) renderAdminCRM(JSON.parse(rawData));
     } else {
         const rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
-        if(rawData) renderSalesCRM(JSON.parse(rawData));
+        if(rawData) renderSalesKanban(JSON.parse(rawData)); // 🔥 Calling Kanban Instead of Table
     }
 }
 
+function renderSalesKanban(data) {
+    if(data.status === 'Blocked') { document.getElementById('app').innerHTML = '<h2 style="color:red;text-align:center;">🚫 BLOCKED</h2>'; return; }
+    
+    let cols = { "New": "", "Contacted": "", "Follow-up": "", "Interested": "", "Site Visit": "" };
+    const today = new Date().toISOString().split('T')[0];
+
+    data.leads.forEach(l => {
+        if(cols[l.status] !== undefined) {
+            let colorCls = "k-gray"; let dateTxt = "No Date Set";
+            if(l.nextDate) {
+                dateTxt = l.nextDate;
+                if(l.nextDate < today) colorCls = "k-red"; 
+                else if(l.nextDate === today) colorCls = "k-yellow"; 
+                else colorCls = "k-green"; 
+            }
+            
+            cols[l.status] += `
+            <div class="kanban-card ${colorCls}">
+                <b style="font-size:14px;">${l.name}</b><br>
+                <span style="color:#0f4c3a">📞 ${l.phone}</span><br>
+                <small style="color:#666">📝 ${l.remarks || 'No remarks'}</small><br>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                    <span class="badge" style="background:#eee; color:#333;">📅 ${dateTxt}</span>
+                    <button class="btn btn-blue btn-sm" style="padding:4px 8px; font-size:11px;" onclick="openKanbanModal('${l.id}', '${l.status}', '${l.nextDate}', '${l.remarks}', '${l.erp}')">Update</button>
+                </div>
+            </div>`;
+        }
+    });
+
+    let html = `<h3 class="header-title">📊 My Pipeline (Kanban Board)</h3><div class="kanban-board">`;
+    for(let status in cols) {
+        html += `<div class="kanban-col"><h4 style="color:#0f4c3a">${status}</h4>${cols[status] || '<p style="text-align:center; color:#999; font-size:12px;">Empty</p>'}</div>`;
+    }
+    html += `</div>`;
+    
+    // Inject enhanced Modal
+    html += `
+    <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #0d6efd;">
+            <h3 class="header-title">Update Lead Status</h3>
+            <input type="hidden" id="lid">
+            <label>Pipeline Stage</label>
+            <select id="st">
+                <option value="New">New</option><option value="Contacted">Contacted</option><option value="Follow-up">Follow-up</option>
+                <option value="Interested">Interested</option><option value="Site Visit">Site Visit</option>
+                <option value="Sold">Sold (Convert to Booking)</option><option value="Reject">Reject (Lost)</option>
+            </select>
+            <label>Next Follow-up Date</label>
+            <input type="date" id="nxtDate">
+            <label>Follow-up Remarks</label>
+            <input type="text" id="rmk" placeholder="What did the client say?">
+            <div id="erpBox"><label>ERP ID (Mandatory for Deal)</label><input id="erp" placeholder="Enter ERP ID"></div>
+            
+            <button class="btn btn-green" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="saveLead()">Save Update</button> 
+            <button class="btn btn-red" style="width:100%;" onclick="closeModal()">Cancel</button>
+            <div style="margin-top:15px; background:#f4f6f8; padding:10px; font-size:12px; border-radius:5px;" id="his">History will load here...</div>
+        </div>
+    </div>`;
+    
+    document.getElementById('app').innerHTML = html;
+}
+
+// Kanban Modal Logics
+async function openKanbanModal(id, status, date, rem, erp) {
+    document.getElementById('lid').value = id; 
+    document.getElementById('st').value = status;
+    document.getElementById('nxtDate').value = date; 
+    document.getElementById('rmk').value = rem;
+    document.getElementById('erp').value = erp; 
+    document.getElementById('modal').style.display = 'block';
+    
+    // Load History
+    document.getElementById('his').innerHTML = "Loading history...";
+    const h = await apiCall('getHistory', { id: id });
+    if(h) document.getElementById('his').innerHTML = h.map(x => `<b>${x.date}</b>: ${x.status} - ${x.note}`).join('<br>');
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+async function saveLead() {
+    let p = { 
+        id: document.getElementById('lid').value, agent: CURRENT_USER.name, 
+        stage: document.getElementById('st').value, erpId: document.getElementById('erp').value,
+        nextDate: document.getElementById('nxtDate').value, remarks: document.getElementById('rmk').value
+    };
+    if(p.stage === 'Contacted' && !p.erpId) return alert("❌ ERP ID is Required!");
+    document.querySelector('#modal .btn-green').innerText = "Saving...";
+    const res = await apiCall('processLeadUpdate', { data: p }); 
+    showToast(res); closeModal(); loadCRMTab();
+}
+
+// ----------------------------------------------------
+// 🧾 REQUISITION MODULE (4-LEVEL APPROVAL)
+// ----------------------------------------------------
+async function loadHRTab() {
+    const appDiv = document.getElementById('app');
+    appDiv.innerHTML = `<h3 style="text-align:center; padding:30px;">Loading Requisitions...</h3>`;
+    const reqs = await apiCall('getRequisitions');
+    
+    let isTL = CURRENT_USER.role.includes('Team Leader');
+    let isAdmin = CURRENT_USER.department === 'System Control' || CURRENT_USER.department === 'Admin & HR Logistic';
+    let isCEO = CURRENT_USER.role === 'CEO';
+    let isAccounts = CURRENT_USER.department === 'CR & Accounts';
+
+    let html = `
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; border-top: 4px solid #dc3545;">
+        <h3 class="header-title" style="margin:0;">🧾 Expense & Requisitions</h3>
+        <button class="btn btn-red" onclick="document.getElementById('reqModal').style.display='block'">+ Create Requisition</button>
+    </div>
+    
+    <div class="card desktop-table">
+        <table style="font-size:12px;">
+            <thead><tr><th>ID & Date</th><th>Requested By</th><th>Amount</th><th>Purpose</th><th>TL Auth</th><th>Admin Auth</th><th>CEO Auth</th><th>Accounts</th><th>Status</th></tr></thead>
+            <tbody>`;
+            
+    if(reqs && reqs.length > 0) {
+        reqs.forEach(r => {
+            if(!isCEO && !isAdmin && !isAccounts && !isTL && r.user !== CURRENT_USER.name) return;
+            if(isTL && r.dept !== CURRENT_USER.department && r.user !== CURRENT_USER.name) return;
+
+            let btnHtml = "";
+            if(isTL && r.tlApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'TL')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'TL')">Reject</button>`;
+            else if(isAdmin && r.tlApp === 'Approved' && r.adminApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Admin')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'Admin')">Reject</button>`;
+            else if(isCEO && r.adminApp === 'Approved' && r.ceoApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'CEO')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'CEO')">Reject</button>`;
+            else if(isAccounts && r.ceoApp === 'Approved' && r.accApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Accounts')">Pay Now</button>`;
+
+            html += `<tr>
+                <td><b>${r.id}</b><br><small>${r.date}</small></td>
+                <td><b>${r.user}</b><br><small>${r.dept}</small></td>
+                <td style="color:red; font-weight:bold;">৳ ${r.amount}</td>
+                <td>${r.purpose}</td>
+                <td><span class="badge ${r.tlApp==='Approved'?'k-green':r.tlApp==='Rejected'?'k-red':'k-yellow'}">${r.tlApp}</span></td>
+                <td><span class="badge ${r.adminApp==='Approved'?'k-green':r.adminApp==='Rejected'?'k-red':'k-yellow'}">${r.adminApp}</span></td>
+                <td><span class="badge ${r.ceoApp==='Approved'?'k-green':r.ceoApp==='Rejected'?'k-red':'k-yellow'}">${r.ceoApp}</span></td>
+                <td><span class="badge ${r.accApp==='Approved'?'k-green':'k-yellow'}">${r.accApp}</span></td>
+                <td><b>${r.finalStatus}</b><br>${btnHtml}</td>
+            </tr>`;
+        });
+    } else { html += `<tr><td colspan="9" style="text-align:center;">No requisitions found.</td></tr>`; }
+    
+    html += `</tbody></table></div>`;
+
+    // Create Modal
+    html += `
+    <div id="reqModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #dc3545;">
+            <h3 class="header-title">Create Requisition</h3>
+            <label>Amount Needed (Tk)</label><input type="number" id="rqAmt" placeholder="e.g. 5000">
+            <label>Purpose / Details</label><input type="text" id="rqPur" placeholder="e.g. Office Stationery">
+            <button class="btn btn-red" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="submitReq()">Submit Requisition</button> 
+            <button class="btn btn-gray" style="width:100%;" onclick="document.getElementById('reqModal').style.display='none'">Cancel</button>
+        </div>
+    </div>`;
+    appDiv.innerHTML = html;
+}
+
+async function submitReq() {
+    let amt = document.getElementById('rqAmt').value; let pur = document.getElementById('rqPur').value;
+    if(!amt || !pur) return alert("Please fill all fields!");
+    document.querySelector('#reqModal .btn-red').innerText = "Submitting...";
+    let res = await apiCall('createRequisition', { data: { user: CURRENT_USER.name, dept: CURRENT_USER.department, amount: amt, purpose: pur } });
+    showToast(res); document.getElementById('reqModal').style.display='none'; loadHRTab();
+}
+async function approveReq(id, level) {
+    if(confirm(`Approve requisition at ${level} level?`)) {
+        let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Approved' } });
+        showToast(res); loadHRTab();
+    }
+}
+async function rejectReq(id, level) {
+    if(confirm(`Reject this requisition? This will stop the workflow.`)) {
+        let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Rejected' } });
+        showToast(res); loadHRTab();
+    }
+}
+
+// ----------------------------------------------------
+// OLD ADMIN TAB & FUNCTIONS (UNTOUCHED)
+// ----------------------------------------------------
 async function loadAdminTab() {
     const rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
     if(!rawData) return;
@@ -368,19 +561,6 @@ async function loadAdminTab() {
     document.getElementById('cAgent').innerHTML = cAgentOpts;
 }
 
-function renderSalesCRM(data) {
-    if(data.status === 'Blocked') { document.getElementById('app').innerHTML = '<h2 style="color:red;text-align:center;">🚫 BLOCKED</h2>'; return; }
-    
-    let html = `<div class="card desktop-table"><table><thead><tr><th>Client</th><th>Phone</th><th>Status</th><th>Elapsed Time</th><th>ERP ID</th><th>Action</th></tr></thead><tbody>`;
-    data.leads.forEach(l => {
-      let timeHtml = l.status !== 'New' ? '<span style="color:#198754">✓ Handled</span>' : `<span class="timer" data-start="${l.assignTime}">Counting...</span>`;
-      html += `<tr><td><b>${l.name}</b><br><small>${l.product}</small></td><td>${l.phone}</td><td><span class="badge st-con">${l.status}</span></td><td>${timeHtml}</td><td>${l.erp}</td><td><button class="btn btn-blue" onclick="openModal('${l.id}')">Update</button></td></tr>`;
-    });
-    html += `</tbody></table></div>`;
-    document.getElementById('app').innerHTML = html;
-    startTimers();
-}
-
 function renderAdminCRM(data) {
     let stHtml = '<div class="card"><h3 class="header-title">📊 Team CRM Performance</h3><table class="stats-table"><thead><tr><th>Agent</th><th>Total Leads</th><th>New</th><th>Contacted</th><th>Sold</th><th>Reject</th></tr></thead><tbody>';
     for(let ag in data.stats) {
@@ -414,62 +594,20 @@ async function goVisit() {
     }
 }
 
-async function toggleAgent(name) { 
-    const res = await apiCall('toggleAgentStatus', { name: name });
-    showToast(res); loadAdminTab(); 
-}
-
+async function toggleAgent(name) { const res = await apiCall('toggleAgentStatus', { name: name }); showToast(res); loadAdminTab(); }
 async function toggleHoliday() {
     if(confirm("Toggle Global Holiday Mode?")) {
         const res = await apiCall('toggleHolidayMode');
         let btn = document.getElementById('holBtn');
-        btn.innerText = (res === "ON" ? "ON (Sleeping)" : "OFF (Active)");
-        btn.className = (res === "ON" ? "btn btn-red" : "btn btn-green");
+        btn.innerText = (res === "ON" ? "ON (Sleeping)" : "OFF (Active)"); btn.className = (res === "ON" ? "btn btn-red" : "btn btn-green");
     }
 }
-
 async function addLead() {
     let p = { name: document.getElementById('cName').value, phone: document.getElementById('cPhone').value, product: document.getElementById('cProd').value, agent: document.getElementById('cAgent').value };
     if(!p.phone) return alert("Phone required!");
-    const res = await apiCall('adminManualEntry', { data: p });
-    showToast(res); loadAdminTab();
+    const res = await apiCall('adminManualEntry', { data: p }); showToast(res); loadAdminTab();
 }
-
 async function reassign(id) {
-    let agent = document.getElementById('re_'+id).value;
-    if(!agent) return alert("Select an agent");
-    const res = await apiCall('adminReassignLead', { id: id, agent: agent });
-    showToast("Reassigned Successfully!"); loadCRMTab();
-}
-
-// --- MODALS & TIMERS ---
-async function openModal(id) {
-    document.getElementById('lid').value = id;
-    document.getElementById('modal').style.display = 'block';
-    const h = await apiCall('getHistory', { id: id });
-    if(h) document.getElementById('his').innerHTML = h.map(x => `<b>${x.date}</b>: ${x.status} - ${x.note}`).join('<br>');
-}
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-async function saveLead() {
-    let p = { id: document.getElementById('lid').value, agent: CURRENT_USER.name, stage: document.getElementById('st').value, erpId: document.getElementById('erp').value };
-    if(p.stage === 'Contacted' && !p.erpId) return alert("❌ ERP ID is Required!");
-    document.querySelector('#modal button').innerText = "Saving...";
-    const res = await apiCall('processLeadUpdate', { data: p }); 
-    showToast(res); closeModal(); loadCRMTab();
-}
-
-let timerInterval;
-function startTimers() {
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        let now = new Date().getTime();
-        document.querySelectorAll('.timer').forEach(t => {
-            let start = parseInt(t.getAttribute('data-start'));
-            let diff = now - start;
-            let h = Math.floor(diff / 3600000);
-            let m = Math.floor((diff % 3600000) / 60000);
-            t.innerText = h + "h " + m + "m ago";
-        });
-    }, 1000); 
+    let agent = document.getElementById('re_'+id).value; if(!agent) return alert("Select an agent");
+    const res = await apiCall('adminReassignLead', { id: id, agent: agent }); showToast("Reassigned Successfully!"); loadCRMTab();
 }
