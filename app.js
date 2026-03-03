@@ -1,17 +1,17 @@
 // ✅ তোমার Google Script Web App URL এখানে বসাও
-const API_URL = "https://script.google.com/macros/s/AKfycbwFwyiqgG2QJa0vNdgfEmJM0KFdfziScTLXXD_Fj8JY5INXDPOXq9JdRowqqFh4rC6G/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwSHVN9bBre_hF6f4qgwwPc66RQd09H4hueuzK7D4M9VMtgkQqRD6njafwMXimw65Ol/exec";
 
 let CURRENT_USER = null;
 
-// 🛡️ THE MASTER PERMISSION MATRIX (RBAC) - 🔥 Updated Marketing Permission
+// 🛡️ THE MASTER PERMISSION MATRIX (RBAC) - 🔥 Updated Permissions
 const PERMISSIONS = {
     "Executive Management": ["dashboard", "hr", "reports"], 
     "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "reports", "admin"],
     "Sales Department": ["dashboard", "crm", "bookings", "commission", "hr", "reports"], 
     "CR & Accounts": ["dashboard", "bookings", "finance", "commission", "hr", "reports"],
-    "Admin & HR Logistic": ["dashboard", "hr", "reports",],
-    "Marketing Department": ["dashboard", "marketing", "reports", "hr"], // 🔥 "hr" added here
-    "Operations": ["dashboard", "operations", "reports"],
+    "Admin & HR Logistic": ["dashboard", "hr", "reports"],
+    "Marketing Department": ["dashboard", "marketing", "commission", "reports", "hr"], 
+    "Operations": ["dashboard", "operations", "commission", "reports"],
     "Office Support": ["dashboard", "hr"]
 };
 
@@ -29,15 +29,34 @@ const TAB_NAMES = {
     "admin": "⚙️ Admin Control"
 };
 
-// --- CSS Injector for Kanban Board & Print Voucher ---
+// --- CSS Injector for Kanban Board, Wings, Voucher & Mobile Card View ---
 document.head.insertAdjacentHTML("beforeend", `
 <style>
+/* Kanban Styles */
 .kanban-board { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
 .kanban-col { background: #f4f6f8; min-width: 280px; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .kanban-col h4 { text-align: center; margin-top: 0; padding-bottom: 10px; border-bottom: 2px solid #ccc; }
-.kanban-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 13px; }
+.kanban-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 13px; position:relative; }
 .k-red { border-left: 5px solid #dc3545; } .k-yellow { border-left: 5px solid #f1c40f; } .k-green { border-left: 5px solid #198754; } .k-gray { border-left: 5px solid #6c757d; }
 .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+
+/* 🌟 Wings (Action Menu) Styles */
+.wings-btn { cursor: pointer; color: #0d6efd; text-decoration: underline; font-weight: bold; display: inline-block; margin-bottom: 5px; }
+.wings-panel { display: none; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin-top: 10px; animation: fadeIn 0.3s; }
+.wings-panel.active { display: block; }
+.history-list { max-height: 100px; overflow-y: auto; font-size: 11px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #555; }
+
+/* Mobile Friendly Card View CSS */
+@media screen and (max-width: 768px) {
+    .desktop-table table, .desktop-table thead, .desktop-table tbody, .desktop-table th, .desktop-table td, .desktop-table tr { display: block; }
+    .desktop-table thead tr { position: absolute; top: -9999px; left: -9999px; }
+    .desktop-table tr { border: 1px solid #ccc; margin-bottom: 15px; border-radius: 8px; background: #fff; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .desktop-table td { border: none; border-bottom: 1px dashed #eee; position: relative; padding-left: 45%; text-align: left; }
+    .desktop-table td:before { position: absolute; top: 12px; left: 10px; width: 40%; padding-right: 10px; white-space: nowrap; font-weight: bold; color: #0f4c3a; content: attr(data-label); }
+    .desktop-table td:last-child { border-bottom: 0; }
+    .kanban-board { flex-direction: column; }
+    .kanban-col { width: 100%; min-width: unset; margin-bottom: 15px; }
+}
 
 /* Voucher Print Styles */
 @media print {
@@ -134,8 +153,8 @@ function switchTab(tabId) {
     else if(tabId === 'crm') loadCRMTab();
     else if(tabId === 'admin') loadAdminTab();
     else if(tabId === 'bookings') loadBookingsTab(); 
-    else if(tabId === 'hr') loadHRTab(); // 🔥 Requisition Connected
-    else if(tabId === 'reports') loadComingSoonTab("Reports");
+    else if(tabId === 'hr') loadHRTab(); 
+    else if(tabId === 'reports') loadReportsTab(); // 🔥 Report Live 
     else if(tabId === 'finance') loadComingSoonTab("Installments");
     else if(tabId === 'commission') loadComingSoonTab("Commissions");
     else loadComingSoonTab(tabId);
@@ -152,7 +171,7 @@ function loadComingSoonTab(moduleName) {
 }
 
 // ----------------------------------------------------
-// 🌟 10-POINT CEO DASHBOARD (UNTOUCHED)
+// 🌟 DASHBOARD LOGIC (Real-time Count Added)
 // ----------------------------------------------------
 async function loadDashboardTab() {
     const appDiv = document.getElementById('app');
@@ -203,30 +222,68 @@ async function loadDashboardTab() {
                     <p>Overall ROI: <b style="color:green;">0%</b></p>
                 </div>
             </div>
-            
-            <div class="card" style="margin-top:15px; background:#fff5f5; border:1px solid #dc3545;">
-                <h3 class="header-title" style="color:#dc3545;">⚠️ Risk Zone & Today's Snapshot</h3>
-                <p><b>Today:</b> 0 Leads | 0 Bookings | ৳ 0 Collection</p>
-                <p style="color:#dc3545;"><b>Overdue Installments:</b> 0 Clients</p>
-            </div>
         </div>`;
     } else {
+        // 🔥 Real-time Dashboard for General Users
+        const rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
+        let leadsCount = 0; let bookingCount = 0; let tasksCount = 0;
+        
+        if(rawData) {
+            let data = JSON.parse(rawData);
+            if(data.leads) {
+                leadsCount = data.leads.length;
+                bookingCount = data.leads.filter(l => l.status === 'Booking').length;
+                tasksCount = data.leads.filter(l => l.status !== 'Booking' && l.status !== 'Reject').length;
+            }
+        }
+
         appDiv.innerHTML = `
           <div class="card" style="text-align:center;">
             <h2 class="header-title">Welcome to Divine OS, ${CURRENT_USER.name}!</h2>
             <p style="color:#666;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
           </div>
           <div class="pie-container">
-            <div class="stat-box"><div class="stat-num" style="color:#0d6efd">0</div>Assigned Leads</div>
-            <div class="stat-box"><div class="stat-num" style="color:#198754">0</div>My Bookings</div>
-            <div class="stat-box"><div class="stat-num" style="color:#f39c12">0</div>Pending Tasks</div>
+            <div class="stat-box"><div class="stat-num" style="color:#0d6efd">${leadsCount}</div>Assigned Leads</div>
+            <div class="stat-box"><div class="stat-num" style="color:#198754">${bookingCount}</div>My Bookings</div>
+            <div class="stat-box"><div class="stat-num" style="color:#f39c12">${tasksCount}</div>Pending Tasks</div>
           </div>
         `;
     }
 }
 
 // ----------------------------------------------------
-// 📝 BOOKINGS MODULE FRONTEND (UNTOUCHED)
+// 📄 REPORTS MODULE FRONTEND (Now Live!)
+// ----------------------------------------------------
+async function loadReportsTab() {
+    const appDiv = document.getElementById('app');
+    appDiv.innerHTML = `
+    <div class="card" style="text-align:center; padding: 40px; border-top: 4px solid #6f42c1;">
+        <h2 class="header-title">📄 Advanced Reporting Hub</h2>
+        <p style="color:#666;">Generate and download system reports based on your access level.</p>
+        
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+            <select id="repTime" style="max-width:200px;">
+                <option value="Last 24 Hours">Last 24 Hours</option>
+                <option value="This Week">This Week</option>
+                <option value="This Month">This Month</option>
+                <option value="All Time">All Time</option>
+            </select>
+            <button class="btn btn-blue" onclick="generateReport()">Generate & View Report</button>
+        </div>
+        <div id="reportArea" style="margin-top:30px; text-align:left;"></div>
+    </div>`;
+}
+
+async function generateReport() {
+    document.getElementById('reportArea').innerHTML = "Generating Data...";
+    let timeRange = document.getElementById('repTime').value;
+    let agent = (CURRENT_USER.role === 'CEO' || CURRENT_USER.role === 'Chief System Architect') ? 'All Agents' : CURRENT_USER.name;
+    const res = await apiCall('generateReportHTML', { agent: agent, time: timeRange });
+    document.getElementById('reportArea').innerHTML = res || "No data found for this period.";
+}
+
+// ----------------------------------------------------
+// 📝 BOOKINGS MODULE (With Update Payment)
 // ----------------------------------------------------
 async function loadBookingsTab() {
     const appDiv = document.getElementById('app');
@@ -244,25 +301,38 @@ async function loadBookingsTab() {
     
     <div class="card desktop-table">
         <table>
-            <thead><tr><th>Booking ID</th><th>Customer</th><th>Project</th><th>Total Price</th><th>Booking Money</th><th>Agent</th><th>Date</th></tr></thead>
+            <thead><tr><th>Booking ID</th><th>Customer</th><th>Project</th><th>Total Price</th><th>Total Paid</th><th>Agent</th><th>Action</th></tr></thead>
             <tbody>`;
     
     if(bookings.length > 0) {
         bookings.forEach(b => {
-            html += `<tr><td><b>${b.id}</b><br><small>${b.leadId}</small></td><td>${b.name}</td><td>${b.project}</td><td>৳ ${b.price}</td><td style="color:green; font-weight:bold;">৳ ${b.paid}</td><td>${b.agent}</td><td>${b.date}</td></tr>`;
+            let actionBtn = "";
+            if(CURRENT_USER.department === 'CR & Accounts' || b.agent === CURRENT_USER.name) {
+                actionBtn = `<button class="btn btn-gold btn-sm" onclick="openPaymentModal('${b.id}', '${b.name}', '${b.price}', '${b.paid}')">Update Payment</button>`;
+            }
+            html += `<tr>
+                <td data-label="Booking ID"><b>${b.id}</b><br><small>${b.leadId}</small></td>
+                <td data-label="Customer">${b.name}</td>
+                <td data-label="Project">${b.project}</td>
+                <td data-label="Total Price">৳ ${b.price}</td>
+                <td data-label="Total Paid" style="color:green; font-weight:bold;">৳ ${b.paid}</td>
+                <td data-label="Agent">${b.agent}</td>
+                <td data-label="Action">${actionBtn}</td>
+            </tr>`;
         });
     } else {
-        html += `<tr><td colspan="7" style="text-align:center;">No bookings found. Try converting a lead to 'Sold' first!</td></tr>`;
+        html += `<tr><td colspan="7" style="text-align:center;">No bookings found.</td></tr>`;
     }
     html += `</tbody></table></div>`;
     
+    // New Booking Modal
     html += `
     <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
         <div class="card" style="margin:50px auto; max-width:500px; border-top: 4px solid #198754;">
             <h3 class="header-title">Create New Booking</h3>
-            <p style="font-size:12px; color:#666;">Note: Only leads marked as 'Sold' appear here.</p>
+            <p style="font-size:12px; color:#666;">Note: Only leads marked as 'Booking' appear here.</p>
             
-            <label>Select Sold Lead</label>
+            <label>Select Prospect</label>
             <select id="b_lead" onchange="autoFillBooking()"><option value="">Loading leads...</option></select>
             
             <input type="hidden" id="b_name">
@@ -274,14 +344,31 @@ async function loadBookingsTab() {
                 <option value="MPL">MPL (Marketing Provided Lead) - 3% Comm</option>
             </select>
             
-            <label>Total Price (Tk)</label>
+            <label>Total Deal Price (Tk)</label>
             <input type="number" id="b_price" placeholder="e.g. 5000000">
             
-            <label>Booking Money Received (Tk)</label>
+            <label>Booking / Down Payment Received (Tk)</label>
             <input type="number" id="b_paid" placeholder="e.g. 200000">
             
             <button class="btn btn-green" style="width:100%; margin-bottom:10px; margin-top:10px;" onclick="submitBooking()">Submit Booking</button> 
             <button class="btn btn-red" style="width:100%;" onclick="closeBookingModal()">Cancel</button>
+        </div>
+    </div>`;
+
+    // Update Payment Modal
+    html += `
+    <div id="payModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #f1c40f;">
+            <h3 class="header-title">Update Payment</h3>
+            <p id="payClientInfo" style="font-size:14px; font-weight:bold; margin-bottom:10px;"></p>
+            <input type="hidden" id="p_bkgId">
+            <input type="hidden" id="p_oldPaid">
+            
+            <label>New Amount Received (Tk)</label>
+            <input type="number" id="p_newAmt" placeholder="e.g. 50000">
+            
+            <button class="btn btn-gold" style="width:100%; margin-bottom:10px; margin-top:10px;" onclick="submitPaymentUpdate()">Save Update</button> 
+            <button class="btn btn-gray" style="width:100%;" onclick="document.getElementById('payModal').style.display='none'">Cancel</button>
         </div>
     </div>`;
     
@@ -289,7 +376,6 @@ async function loadBookingsTab() {
 }
 
 let currentSoldLeads = [];
-
 async function openBookingModal() {
     document.getElementById('bookingModal').style.display = 'block';
     document.getElementById('b_lead').innerHTML = '<option>Loading...</option>';
@@ -302,7 +388,7 @@ async function openBookingModal() {
             opts += `<option value="${l.id}">${l.name} (${l.project})</option>`;
         });
     } else {
-        opts = '<option value="">❌ No pending sold leads found.</option>';
+        opts = '<option value="">❌ No pending leads found.</option>';
     }
     document.getElementById('b_lead').innerHTML = opts;
 }
@@ -315,7 +401,6 @@ function autoFillBooking() {
         document.getElementById('b_project').value = lead.project;
     }
 }
-
 function closeBookingModal() { document.getElementById('bookingModal').style.display = 'none'; }
 
 async function submitBooking() {
@@ -327,19 +412,36 @@ async function submitBooking() {
     let type = document.getElementById('b_type').value;
     
     if(!leadId || !price || !paid) return alert("Please fill all fields.");
-    
     document.querySelector('#bookingModal .btn-green').innerText = "Processing...";
     
     let payload = { leadId: leadId, customerName: name, project: project, totalPrice: price, bookingMoney: paid, agent: CURRENT_USER.name, leadType: type };
-    
     let res = await apiCall('createBooking', { data: payload });
-    showToast(res);
-    closeBookingModal();
-    loadBookingsTab(); 
+    showToast(res); closeBookingModal(); loadBookingsTab(); 
+}
+
+function openPaymentModal(bkgId, name, price, paid) {
+    document.getElementById('p_bkgId').value = bkgId;
+    document.getElementById('p_oldPaid').value = paid;
+    let due = parseInt(price) - parseInt(paid);
+    document.getElementById('payClientInfo').innerHTML = `Client: ${name}<br>Total Due: ৳ ${due}`;
+    document.getElementById('payModal').style.display = 'block';
+}
+
+async function submitPaymentUpdate() {
+    let bkgId = document.getElementById('p_bkgId').value;
+    let oldPaid = parseInt(document.getElementById('p_oldPaid').value || 0);
+    let newAmt = parseInt(document.getElementById('p_newAmt').value);
+    
+    if(!newAmt) return alert("Enter amount.");
+    document.querySelector('#payModal .btn-gold').innerText = "Saving...";
+    
+    let totalPaid = oldPaid + newAmt;
+    let res = await apiCall('updateBookingPayment', { bkgId: bkgId, totalPaid: totalPaid });
+    showToast(res); document.getElementById('payModal').style.display='none'; loadBookingsTab();
 }
 
 // ----------------------------------------------------
-// 🌟 SALES CRM (KANBAN BOARD - UNTOUCHED)
+// 🌟 SALES CRM (KANBAN BOARD WITH ACTION WINGS)
 // ----------------------------------------------------
 async function loadCRMTab() {
     const appDiv = document.getElementById('app');
@@ -368,14 +470,25 @@ function renderSalesKanban(data) {
                 else colorCls = "k-green"; 
             }
             
+            // 🔥 The Wings Card Design
             cols[l.status] += `
             <div class="kanban-card ${colorCls}">
                 <b style="font-size:14px;">${l.name}</b><br>
-                <span style="color:#0f4c3a">📞 ${l.phone}</span><br>
+                <div class="wings-btn" onclick="toggleWings('${l.id}')">📞 ${l.phone}</div><br>
                 <small style="color:#666">📝 ${l.remarks || 'No remarks'}</small><br>
+                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                     <span class="badge" style="background:#eee; color:#333;">📅 ${dateTxt}</span>
-                    <button class="btn btn-blue btn-sm" style="padding:4px 8px; font-size:11px;" onclick="openKanbanModal('${l.id}', '${l.status}', '${l.nextDate}', '${l.remarks}', '${l.erp}')">Update</button>
+                    <button class="btn btn-blue btn-sm" style="padding:4px 8px; font-size:11px;" onclick="openKanbanModal('${l.id}', '${l.status}', '${l.nextDate}', '${l.remarks}', '${l.erp}')">Edit Stage</button>
+                </div>
+
+                <div id="wings_${l.id}" class="wings-panel">
+                    <div id="his_${l.id}" class="history-list">Loading history...</div>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;">
+                        <input type="text" id="cn_${l.id}" placeholder="Short Call Note" style="flex:1; padding:4px; font-size:11px;">
+                        <button class="btn btn-green btn-sm" style="padding:4px 8px; font-size:11px;" onclick="saveCallNote('${l.id}')">Add Note</button>
+                    </div>
+                    <button class="btn btn-gold btn-sm" style="width:100%; font-size:11px;" onclick="openMeetingModal('${l.id}', '${l.name}', '${l.product}')">📅 Schedule Meeting</button>
                 </div>
             </div>`;
         }
@@ -387,30 +500,88 @@ function renderSalesKanban(data) {
     }
     html += `</div>`;
     
+    // Status Edit Modal
     html += `
     <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
         <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #0d6efd;">
-            <h3 class="header-title">Update Lead Status</h3>
+            <h3 class="header-title">Update Pipeline Stage</h3>
             <input type="hidden" id="lid">
-            <label>Pipeline Stage</label>
+            <label>Stage</label>
             <select id="st">
                 <option value="New">New</option><option value="Contacted">Contacted</option><option value="Follow-up">Follow-up</option>
                 <option value="Interested">Interested</option><option value="Site Visit">Site Visit</option>
-                <option value="Sold">Sold (Convert to Booking)</option><option value="Reject">Reject (Lost)</option>
+                <option value="Booking">Booking (Deal Won)</option><option value="Reject">Reject (Lost)</option>
             </select>
-            <label>Next Follow-up Date</label>
-            <input type="date" id="nxtDate">
-            <label>Follow-up Remarks</label>
-            <input type="text" id="rmk" placeholder="What did the client say?">
+            <label>Next Follow-up Date</label><input type="date" id="nxtDate">
+            <label>Stage Change Remarks</label><input type="text" id="rmk" placeholder="Why changing stage?">
             <div id="erpBox"><label>ERP ID (Mandatory for Deal)</label><input id="erp" placeholder="Enter ERP ID"></div>
             
             <button class="btn btn-green" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="saveLead()">Save Update</button> 
             <button class="btn btn-red" style="width:100%;" onclick="closeModal()">Cancel</button>
-            <div style="margin-top:15px; background:#f4f6f8; padding:10px; font-size:12px; border-radius:5px;" id="his">History will load here...</div>
+        </div>
+    </div>`;
+
+    // Meeting Schedule Modal
+    html += `
+    <div id="meetingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+        <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #f1c40f;">
+            <h3 class="header-title">Schedule Meeting / Site Visit</h3>
+            <input type="hidden" id="m_lid">
+            <label>Prospect Name</label><input type="text" id="m_name" readonly style="background:#eee;">
+            <label>Project</label><input type="text" id="m_prod" readonly style="background:#eee;">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1"><label>Date</label><input type="date" id="m_date"></div>
+                <div style="flex:1"><label>Time</label><input type="time" id="m_time"></div>
+            </div>
+            <button class="btn btn-gold" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="saveMeeting()">Confirm Schedule</button> 
+            <button class="btn btn-gray" style="width:100%;" onclick="document.getElementById('meetingModal').style.display='none'">Cancel</button>
         </div>
     </div>`;
     
     document.getElementById('app').innerHTML = html;
+}
+
+async function toggleWings(id) {
+    let wing = document.getElementById(`wings_${id}`);
+    if (wing.classList.contains('active')) { wing.classList.remove('active'); return; }
+    
+    // Close other open wings
+    document.querySelectorAll('.wings-panel').forEach(p => p.classList.remove('active'));
+    wing.classList.add('active');
+    
+    const h = await apiCall('getHistory', { id: id });
+    if(h && h.length > 0) document.getElementById(`his_${id}`).innerHTML = h.map(x => `<b>${x.date}</b>: ${x.note}`).join('<br>');
+    else document.getElementById(`his_${id}`).innerHTML = "No call history found.";
+}
+
+async function saveCallNote(id) {
+    let note = document.getElementById(`cn_${id}`).value;
+    if(!note) return;
+    document.getElementById(`cn_${id}`).value = "Saving...";
+    await apiCall('addCallNote', { id: id, note: note, agent: CURRENT_USER.name });
+    showToast("Note Added!");
+    toggleWings(id); // Reload wings
+}
+
+function openMeetingModal(id, name, prod) {
+    document.getElementById('m_lid').value = id;
+    document.getElementById('m_name').value = name;
+    document.getElementById('m_prod').value = prod;
+    document.getElementById('meetingModal').style.display = 'block';
+}
+
+async function saveMeeting() {
+    let id = document.getElementById('m_lid').value;
+    let date = document.getElementById('m_date').value;
+    let time = document.getElementById('m_time').value;
+    if(!date || !time) return alert("Select Date & Time");
+    
+    document.querySelector('#meetingModal .btn-gold').innerText = "Scheduling...";
+    let note = `🗓️ Meeting Fixed: ${date} at ${time}`;
+    await apiCall('addCallNote', { id: id, note: note, agent: CURRENT_USER.name });
+    
+    showToast("Meeting Scheduled!");
+    document.getElementById('meetingModal').style.display = 'none';
 }
 
 async function openKanbanModal(id, status, date, rem, erp) {
@@ -420,10 +591,6 @@ async function openKanbanModal(id, status, date, rem, erp) {
     document.getElementById('rmk').value = rem;
     document.getElementById('erp').value = erp; 
     document.getElementById('modal').style.display = 'block';
-    
-    document.getElementById('his').innerHTML = "Loading history...";
-    const h = await apiCall('getHistory', { id: id });
-    if(h) document.getElementById('his').innerHTML = h.map(x => `<b>${x.date}</b>: ${x.status} - ${x.note}`).join('<br>');
 }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
@@ -436,11 +603,13 @@ async function saveLead() {
     if(p.stage === 'Contacted' && !p.erpId) return alert("❌ ERP ID is Required!");
     document.querySelector('#modal .btn-green').innerText = "Saving...";
     const res = await apiCall('processLeadUpdate', { data: p }); 
-    showToast(res); closeModal(); loadCRMTab();
+    showToast("Update Saved! Reloading..."); 
+    closeModal(); 
+    setTimeout(() => { loadCRMTab(); }, 2000); // 2 Sec Delay
 }
 
 // ----------------------------------------------------
-// 🧾 🔥 REQUISITION MODULE (DYNAMIC FORM + PRINT VOUCHER)
+// 🧾 REQUISITION MODULE (PRIVACY & CONVEYANCE FIXED)
 // ----------------------------------------------------
 let allRequisitions = [];
 
@@ -467,90 +636,69 @@ async function loadHRTab() {
             
     if(allRequisitions.length > 0) {
         allRequisitions.forEach(r => {
+            // 🔥 Privacy Logic
             if(!isCEO && !isAdmin && !isAccounts && !isTL && r.user !== CURRENT_USER.name) return;
             if(isTL && r.dept !== CURRENT_USER.department && r.user !== CURRENT_USER.name) return;
+            if(isAccounts && r.ceoApp !== 'Approved') return; // Accounts only sees CEO approved
 
             let btnHtml = "";
             
-            // Workflow Actions
             if(isTL && r.tlApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'TL')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'TL')">Reject</button>`;
             else if(isAdmin && (r.tlApp === 'Approved' || r.tlApp === 'N/A') && r.adminApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Admin')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'Admin')">Reject</button>`;
             else if(isCEO && r.adminApp === 'Approved' && r.ceoApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'CEO')">Approve</button> <button class="btn btn-red btn-sm" onclick="rejectReq('${r.id}', 'CEO')">Reject</button>`;
             else if(isAccounts && r.ceoApp === 'Approved' && r.accApp === 'Pending') btnHtml = `<button class="btn btn-green btn-sm" onclick="approveReq('${r.id}', 'Accounts')">Approve/Pay</button>`;
             
-            // 🔥 Updated: Print Voucher Button Logic (Always visible after approval for relevant users)
             if((r.finalStatus.includes('Logistic 🟢') || r.finalStatus.includes('Printed ✅')) && (isAccounts || r.user === CURRENT_USER.name || isCEO || isAdmin)) {
-                btnHtml += `<br><button class="btn btn-blue btn-sm" style="margin-top:5px;" onclick="printVoucher('${r.id}')">🖨️ View & Print Voucher</button>`;
+                btnHtml += `<br><button class="btn btn-blue btn-sm" style="margin-top:5px;" onclick="printVoucher('${r.id}')">🖨️ View Voucher</button>`;
             }
 
             let attachLink = r.attachment ? `<a href="${r.attachment}" target="_blank" style="color:blue;">📎 View Bill</a>` : '<small style="color:gray;">No Attach</small>';
 
             html += `<tr>
-                <td><b>${r.id}</b><br><small>${r.date}</small></td>
-                <td><b>${r.user}</b><br><small>${r.dept}</small></td>
-                <td><b style="color:red; font-size:14px;">৳ ${r.amount}</b><br><small>${r.reqType}</small></td>
-                <td>${r.purpose}<br>${attachLink}</td>
-                <td><span class="badge ${r.tlApp==='Approved'?'k-green':r.tlApp==='Rejected'?'k-red':'k-yellow'}">${r.tlApp}</span></td>
-                <td><span class="badge ${r.adminApp==='Approved'?'k-green':r.adminApp==='Rejected'?'k-red':'k-yellow'}">${r.adminApp}</span></td>
-                <td><span class="badge ${r.ceoApp==='Approved'?'k-green':r.ceoApp==='Rejected'?'k-red':'k-yellow'}">${r.ceoApp}</span></td>
-                <td><span class="badge ${r.accApp==='Approved'?'k-green':'k-yellow'}">${r.accApp}</span></td>
-                <td><b>${r.finalStatus}</b><br>${btnHtml}</td>
+                <td data-label="ID & Date"><b>${r.id}</b><br><small>${r.date}</small></td>
+                <td data-label="Requested By"><b>${r.user}</b><br><small>${r.dept}</small></td>
+                <td data-label="Amount"><b>৳ ${r.amount}</b><br><small>${r.reqType}</small></td>
+                <td data-label="Purpose">${r.purpose}<br>${attachLink}</td>
+                <td data-label="TL Auth"><span class="badge ${r.tlApp==='Approved'?'k-green':r.tlApp==='Rejected'?'k-red':'k-yellow'}">${r.tlApp}</span></td>
+                <td data-label="Admin Auth"><span class="badge ${r.adminApp==='Approved'?'k-green':r.adminApp==='Rejected'?'k-red':'k-yellow'}">${r.adminApp}</span></td>
+                <td data-label="CEO Auth"><span class="badge ${r.ceoApp==='Approved'?'k-green':r.ceoApp==='Rejected'?'k-red':'k-yellow'}">${r.ceoApp}</span></td>
+                <td data-label="Accounts"><span class="badge ${r.accApp==='Approved'?'k-green':'k-yellow'}">${r.accApp}</span></td>
+                <td data-label="Status"><b>${r.finalStatus}</b><br>${btnHtml}</td>
             </tr>`;
         });
     } else { html += `<tr><td colspan="9" style="text-align:center;">No requisitions found.</td></tr>`; }
     
     html += `</tbody></table></div>`;
 
-    // Dynamic Form Modal
     html += `
     <div id="reqModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
         <div class="card" style="margin:50px auto; max-width:400px; border-top: 4px solid #dc3545; max-height:80vh; overflow-y:auto;">
             <h3 class="header-title">Create Requisition</h3>
-            
-            <label>Requisition Type (Based on Dept)</label>
-            <select id="rqType"></select>
-            
-            <label>Amount Needed (Tk)</label>
-            <input type="number" id="rqAmt" placeholder="e.g. 5000">
-            
+            <label>Requisition Type</label><select id="rqType"></select>
+            <label>Amount Needed (Tk)</label><input type="number" id="rqAmt" placeholder="e.g. 5000">
             <div style="display:flex; gap:10px;">
-                <div style="flex:1">
-                    <label>Expense Category</label>
-                    <select id="rqCat">
-                        <option>Travel & Transport</option><option>Office Supply</option>
-                        <option>Marketing</option><option>Legal & Bank</option>
-                    </select>
-                </div>
-                <div style="flex:1">
-                    <label>Payment Mode</label>
-                    <select id="rqMode"><option>Cash</option><option>Bank Transfer</option><option>Advance</option></select>
-                </div>
+                <div style="flex:1"><label>Expense Category</label><select id="rqCat"><option>Travel & Transport</option><option>Office Supply</option><option>Marketing</option><option>Legal & Bank</option></select></div>
+                <div style="flex:1"><label>Payment Mode</label><select id="rqMode"><option>Cash</option><option>Bank Transfer</option><option>Advance</option></select></div>
             </div>
-
-            <label>Purpose / Details</label>
-            <input type="text" id="rqPur" placeholder="Detail explanation">
-            
-            <label>Attachment (Bill Photo / Drive Link)</label>
-            <input type="text" id="rqAtt" placeholder="Paste Image/Drive URL here (Optional)">
-
+            <label>Purpose / Details</label><input type="text" id="rqPur" placeholder="Detail explanation">
+            <label>Attachment (Bill Photo / Drive Link)</label><input type="text" id="rqAtt" placeholder="Paste URL (Optional)">
             <button class="btn btn-red" style="width:100%; margin-bottom:10px; margin-top:15px;" onclick="submitReq()">Submit Requisition</button> 
             <button class="btn btn-gray" style="width:100%;" onclick="document.getElementById('reqModal').style.display='none'">Cancel</button>
         </div>
-    </div>
-    
-    <div id="printVoucherArea" style="display:none;"></div>
-    `;
+    </div>`;
     appDiv.innerHTML = html;
 }
 
 function openReqModal() {
     let dept = CURRENT_USER.department;
-    let opts = "";
-    if(dept === 'Sales Department') opts = "<option>Conveyance</option><option>Mobile Bill</option><option>Client Meeting Expense</option><option>Site Visit Expense</option>";
-    else if(dept === 'Marketing Department') opts = "<option>Campaign Boost</option><option>Video Shoot Cost</option><option>Designer Cost</option><option>Software Subscription</option>";
-    else if(dept === 'CR & Accounts') opts = "<option>Bank Charges</option><option>Document Processing</option><option>Stamp / Legal Fees</option>";
-    else if(dept === 'Admin & HR Logistic') opts = "<option>Office Desk / Chair</option><option>Printer & Supply</option><option>Internet Bill</option><option>Electricity</option>";
-    else opts = "<option>Stationary</option><option>Cleaning Supplies</option><option>Minor Repair</option><option>General Utility</option>";
+    // 🔥 Convexance added to all default options
+    let opts = "<option>Conveyance (Travel Bill)</option>"; 
+    
+    if(dept === 'Sales Department') opts += "<option>Mobile Bill</option><option>Client Meeting Expense</option><option>Site Visit Expense</option>";
+    else if(dept === 'Marketing Department') opts += "<option>Campaign Boost</option><option>Video Shoot Cost</option><option>Designer Cost</option><option>Software Subscription</option>";
+    else if(dept === 'CR & Accounts') opts += "<option>Bank Charges</option><option>Document Processing</option><option>Stamp / Legal Fees</option>";
+    else if(dept === 'Admin & HR Logistic') opts += "<option>Office Desk / Chair</option><option>Printer & Supply</option><option>Internet Bill</option><option>Electricity</option>";
+    else opts += "<option>Stationary</option><option>Cleaning Supplies</option><option>Minor Repair</option><option>General Utility</option>";
     
     document.getElementById('rqType').innerHTML = opts;
     document.getElementById('reqModal').style.display = 'block';
@@ -567,34 +715,30 @@ async function submitReq() {
     if(!amt || !pur) return alert("Amount and Purpose are mandatory!");
     document.querySelector('#reqModal .btn-red').innerText = "Submitting...";
     
-    let reqData = { 
-        user: CURRENT_USER.name, dept: CURRENT_USER.department, 
-        amount: amt, reqType: type, category: cat, payMode: mode, purpose: pur, attachment: att 
-    };
-    
+    let reqData = { user: CURRENT_USER.name, dept: CURRENT_USER.department, amount: amt, reqType: type, category: cat, payMode: mode, purpose: pur, attachment: att };
     let res = await apiCall('createRequisition', { data: reqData });
-    showToast(res); document.getElementById('reqModal').style.display='none'; loadHRTab();
+    showToast("Submitted! Reloading..."); document.getElementById('reqModal').style.display='none'; 
+    setTimeout(() => { loadHRTab(); }, 2000);
 }
 
 async function approveReq(id, level) {
     if(confirm(`Approve requisition at ${level} level?`)) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Approved' } });
-        showToast(res); loadHRTab();
+        showToast("Approved! Reloading..."); setTimeout(() => { loadHRTab(); }, 2000);
     }
 }
 async function rejectReq(id, level) {
-    if(confirm(`Reject this requisition? This will stop the workflow.`)) {
+    if(confirm(`Reject this requisition?`)) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Rejected' } });
-        showToast(res); loadHRTab();
+        showToast("Rejected! Reloading..."); setTimeout(() => { loadHRTab(); }, 2000);
     }
 }
 
-// 🖨️ 🔥 UPDATED: PDF Cash Voucher Print Logic (Professional Pad Design)
+// 🖨️ PDF Cash Voucher Print Logic (Professional Pad Design)
 function printVoucher(reqId) {
     let req = allRequisitions.find(r => r.id === reqId);
     if(!req) return;
 
-    // HTML for the New Window
     let printContent = `
     <html>
     <head>
@@ -616,19 +760,10 @@ function printVoucher(reqId) {
     <body>
         <div class="pad-container">
             <div class="stamp">Approved & Verified</div>
-
             <div class="header">
-                <div>
-                    <img src="https://divinegroupbd.net/images/divine-group-logo.png" width="180" alt="Divine Group">
-                    <h2 style="margin: 8px 0 0 0; color: #0f4c3a; font-size: 22px;">Cash / Payment Voucher</h2>
-                </div>
-                <div style="text-align: right; font-size: 14px; line-height: 1.5;">
-                    <b>Voucher No:</b> ${req.id}<br>
-                    <b>Issue Date:</b> ${new Date().toLocaleDateString()}<br>
-                    <b style="color:#198754; border: 1px solid #198754; padding: 2px 5px; border-radius: 4px;">Status: PAID ✅</b>
-                </div>
+                <div><img src="https://divinegroupbd.net/images/divine-group-logo.png" width="180" alt="Divine Group"><h2 style="margin: 8px 0 0 0; color: #0f4c3a; font-size: 22px;">Cash / Payment Voucher</h2></div>
+                <div style="text-align: right; font-size: 14px; line-height: 1.5;"><b>Voucher No:</b> ${req.id}<br><b>Issue Date:</b> ${new Date().toLocaleDateString()}<br><b style="color:#198754; border: 1px solid #198754; padding: 2px 5px; border-radius: 4px;">Status: PAID ✅</b></div>
             </div>
-
             <table class="info-table">
                 <tr><td width="30%"><b>Requested By:</b></td><td><b>${req.user}</b> <span style="color:#666;">(${req.dept})</span></td></tr>
                 <tr><td><b>Expense Category:</b></td><td>${req.category} - ${req.reqType}</td></tr>
@@ -636,58 +771,29 @@ function printVoucher(reqId) {
                 <tr><td><b>Payment Mode:</b></td><td>${req.payMode}</td></tr>
                 <tr style="background:#f4f6f8;"><td><b>Amount Approved:</b></td><td style="font-size:22px; color:#dc3545;"><b>৳ ${req.amount} /_</b></td></tr>
             </table>
-
-            <div class="audit-trail">
-                <b style="color:#000;">System Audit Trail:</b><br>
-                <span style="color:#198754;">✔</span> Team Leader Auth: <b>${req.tlApp}</b><br>
-                <span style="color:#198754;">✔</span> Admin / HR Auth: <b>${req.adminApp}</b><br>
-                <span style="color:#198754;">✔</span> CEO Final Auth: <b>${req.ceoApp}</b><br>
-                <span style="color:#198754;">✔</span> Accounts Disbursed: <b>${req.accApp}</b>
-            </div>
-
+            <div class="audit-trail"><b style="color:#000;">System Audit Trail:</b><br><span style="color:#198754;">✔</span> TL Auth: <b>${req.tlApp}</b><br><span style="color:#198754;">✔</span> Admin Auth: <b>${req.adminApp}</b><br><span style="color:#198754;">✔</span> CEO Auth: <b>${req.ceoApp}</b><br><span style="color:#198754;">✔</span> Accounts Disbursed: <b>${req.accApp}</b></div>
             <div class="sign-area">
-                <div class="sign-box">
-                    <div class="digital-sign">${req.user}</div>
-                    <div class="sign-line">Prepared By (Requester)</div>
-                </div>
-                <div class="sign-box">
-                    <div class="digital-sign" style="color: #d35400;">System Verified</div>
-                    <div class="sign-line">Authorized Signatory</div>
-                </div>
-                <div class="sign-box">
-                    <br><br><br>
-                    <div class="sign-line">Receiver's Signature (Cash)</div>
-                </div>
+                <div class="sign-box"><div class="digital-sign">${req.user}</div><div class="sign-line">Prepared By</div></div>
+                <div class="sign-box"><div class="digital-sign" style="color: #d35400;">System Verified</div><div class="sign-line">Authorized Signatory</div></div>
+                <div class="sign-box"><br><br><br><div class="sign-line">Receiver's Signature (Cash)</div></div>
             </div>
-            
-            <p style="text-align:center; font-size:11px; color:#999; margin-top:40px; border-top: 1px dashed #eee; padding-top: 10px;">
-                This is a digitally generated and verified document. Powered by Divine OS.
-            </p>
+            <p style="text-align:center; font-size:11px; color:#999; margin-top:40px; border-top: 1px dashed #eee; padding-top: 10px;">This is a digitally generated document. Powered by Divine OS.</p>
         </div>
-
-        <script>
-            // Auto trigger print dialogue when window opens
-            window.onload = function() { 
-                setTimeout(() => { window.print(); }, 500); 
-            }
-        </script>
+        <script>window.onload = function() { setTimeout(() => { window.print(); }, 500); }</script>
     </body>
     </html>`;
 
-    // Open in a new popup window to prevent blank screen & CSS issues
     let printWindow = window.open('', '_blank', 'width=900,height=700');
     printWindow.document.write(printContent);
     printWindow.document.close();
 
-    // Update status to "Paid & Printed" silently in background (only if Accounts is printing for the first time)
     if(CURRENT_USER.department === 'CR & Accounts' && req.finalStatus.includes('Logistic 🟢')) {
         apiCall('markVoucherPrinted', { id: reqId });
-        setTimeout(() => { loadHRTab(); }, 2000); // Reload table
     }
 }
 
 // ----------------------------------------------------
-// OLD ADMIN TAB & FUNCTIONS (UNTOUCHED)
+// OLD ADMIN TAB & ACTIONS (UNTOUCHED)
 // ----------------------------------------------------
 async function loadAdminTab() {
     const rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
@@ -750,7 +856,6 @@ function renderAdminCRM(data) {
     document.getElementById('app').innerHTML = stHtml;
 }
 
-// --- ACTIONS ---
 async function goVisit() {
     const res = await apiCall('toggleSalesmanStatus', { user: CURRENT_USER.name });
     if(res === 'Visit') {
@@ -763,7 +868,6 @@ async function goVisit() {
         showToast("Welcome Back! You are ACTIVE.");
     }
 }
-
 async function toggleAgent(name) { const res = await apiCall('toggleAgentStatus', { name: name }); showToast(res); loadAdminTab(); }
 async function toggleHoliday() {
     if(confirm("Toggle Global Holiday Mode?")) {
