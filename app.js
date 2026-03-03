@@ -3,6 +3,25 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwSHVN9bBre_hF6f4qgwwPc
 
 let CURRENT_USER = null;
 
+// 🚀 SUPER FAST CACHE SYSTEM
+let CACHE = {
+    dashboardAdmin: null,
+    dashboardSales: null,
+    bookings: null,
+    soldLeads: null,
+    requisitions: null,
+    history: {} // Saves call history by Lead ID
+};
+
+function clearCache() {
+    CACHE.dashboardAdmin = null;
+    CACHE.dashboardSales = null;
+    CACHE.bookings = null;
+    CACHE.soldLeads = null;
+    CACHE.requisitions = null;
+    // history remains unless specifically cleared
+}
+
 // 🛡️ THE MASTER PERMISSION MATRIX (RBAC) - 🔥 Updated Permissions
 const PERMISSIONS = {
     "Executive Management": ["dashboard", "hr", "reports"], 
@@ -147,14 +166,21 @@ function switchTab(tabId) {
     if(activeBtn) activeBtn.classList.add('active');
 
     const appDiv = document.getElementById('app');
-    appDiv.innerHTML = `<h3 style="text-align:center; padding:30px; color:#0f4c3a;">Loading ${TAB_NAMES[tabId]}...</h3>`;
+    
+    // Fast render without loading screen if cache exists
+    if(tabId === 'crm' && CACHE.dashboardSales) {}
+    else if(tabId === 'bookings' && CACHE.bookings) {}
+    else if(tabId === 'hr' && CACHE.requisitions) {}
+    else {
+        appDiv.innerHTML = `<h3 style="text-align:center; padding:30px; color:#0f4c3a;">Loading ${TAB_NAMES[tabId]}...</h3>`;
+    }
 
     if(tabId === 'dashboard') loadDashboardTab();
     else if(tabId === 'crm') loadCRMTab();
     else if(tabId === 'admin') loadAdminTab();
     else if(tabId === 'bookings') loadBookingsTab(); 
     else if(tabId === 'hr') loadHRTab(); 
-    else if(tabId === 'reports') loadReportsTab(); // 🔥 Report Live 
+    else if(tabId === 'reports') loadReportsTab(); 
     else if(tabId === 'finance') loadComingSoonTab("Installments");
     else if(tabId === 'commission') loadComingSoonTab("Commissions");
     else loadComingSoonTab(tabId);
@@ -171,7 +197,7 @@ function loadComingSoonTab(moduleName) {
 }
 
 // ----------------------------------------------------
-// 🌟 DASHBOARD LOGIC (Real-time Count Added)
+// 🌟 DASHBOARD LOGIC (Real-time & Cached)
 // ----------------------------------------------------
 async function loadDashboardTab() {
     const appDiv = document.getElementById('app');
@@ -224,17 +250,19 @@ async function loadDashboardTab() {
             </div>
         </div>`;
     } else {
-        // 🔥 Real-time Dashboard for General Users
-        const rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
+        // 🚀 Caching logic for fast dashboard
+        if (!CACHE.dashboardSales) {
+            let rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
+            if (rawData) CACHE.dashboardSales = JSON.parse(rawData);
+        }
+        
         let leadsCount = 0; let bookingCount = 0; let tasksCount = 0;
         
-        if(rawData) {
-            let data = JSON.parse(rawData);
-            if(data.leads) {
-                leadsCount = data.leads.length;
-                bookingCount = data.leads.filter(l => l.status === 'Booking').length;
-                tasksCount = data.leads.filter(l => l.status !== 'Booking' && l.status !== 'Reject').length;
-            }
+        if(CACHE.dashboardSales && CACHE.dashboardSales.leads) {
+            let leads = CACHE.dashboardSales.leads;
+            leadsCount = leads.length;
+            bookingCount = leads.filter(l => l.status === 'Booking').length;
+            tasksCount = leads.filter(l => l.status !== 'Booking' && l.status !== 'Reject').length;
         }
 
         appDiv.innerHTML = `
@@ -252,7 +280,7 @@ async function loadDashboardTab() {
 }
 
 // ----------------------------------------------------
-// 📄 REPORTS MODULE FRONTEND (Now Live!)
+// 📄 REPORTS MODULE FRONTEND
 // ----------------------------------------------------
 async function loadReportsTab() {
     const appDiv = document.getElementById('app');
@@ -283,13 +311,15 @@ async function generateReport() {
 }
 
 // ----------------------------------------------------
-// 📝 BOOKINGS MODULE (With Update Payment)
+// 📝 BOOKINGS MODULE (With Update Payment & Cache)
 // ----------------------------------------------------
 async function loadBookingsTab() {
     const appDiv = document.getElementById('app');
-    appDiv.innerHTML = `<h3 style="text-align:center; padding:30px; color:#0f4c3a;">Fetching Bookings...</h3>`;
     
-    const bookings = await apiCall('getBookings', { user: CURRENT_USER.name, role: CURRENT_USER.role, dept: CURRENT_USER.department });
+    if (!CACHE.bookings) {
+        CACHE.bookings = await apiCall('getBookings', { user: CURRENT_USER.name, role: CURRENT_USER.role, dept: CURRENT_USER.department });
+    }
+    const bookings = CACHE.bookings;
     if(!bookings) return;
 
     let html = `
@@ -380,7 +410,10 @@ async function openBookingModal() {
     document.getElementById('bookingModal').style.display = 'block';
     document.getElementById('b_lead').innerHTML = '<option>Loading...</option>';
     
-    currentSoldLeads = await apiCall('getSoldLeads', { user: CURRENT_USER.name, role: CURRENT_USER.role });
+    if (!CACHE.soldLeads) {
+        CACHE.soldLeads = await apiCall('getSoldLeads', { user: CURRENT_USER.name, role: CURRENT_USER.role });
+    }
+    currentSoldLeads = CACHE.soldLeads;
     
     let opts = '<option value="">-- Select a Lead --</option>';
     if(currentSoldLeads && currentSoldLeads.length > 0) {
@@ -416,7 +449,10 @@ async function submitBooking() {
     
     let payload = { leadId: leadId, customerName: name, project: project, totalPrice: price, bookingMoney: paid, agent: CURRENT_USER.name, leadType: type };
     let res = await apiCall('createBooking', { data: payload });
-    showToast(res); closeBookingModal(); loadBookingsTab(); 
+    showToast(res); 
+    closeBookingModal(); 
+    clearCache(); // 🚀 Clear cache so new booking appears
+    loadBookingsTab(); 
 }
 
 function openPaymentModal(bkgId, name, price, paid) {
@@ -437,7 +473,10 @@ async function submitPaymentUpdate() {
     
     let totalPaid = oldPaid + newAmt;
     let res = await apiCall('updateBookingPayment', { bkgId: bkgId, totalPaid: totalPaid });
-    showToast(res); document.getElementById('payModal').style.display='none'; loadBookingsTab();
+    showToast(res); 
+    document.getElementById('payModal').style.display='none'; 
+    clearCache(); // 🚀 Clear cache to reflect new payment
+    loadBookingsTab();
 }
 
 // ----------------------------------------------------
@@ -446,11 +485,17 @@ async function submitPaymentUpdate() {
 async function loadCRMTab() {
     const appDiv = document.getElementById('app');
     if(CURRENT_USER.department === 'Executive Management' || CURRENT_USER.department === 'System Control') {
-        const rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
-        if(rawData) renderAdminCRM(JSON.parse(rawData));
+        if (!CACHE.dashboardAdmin) {
+            let rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
+            if(rawData) CACHE.dashboardAdmin = JSON.parse(rawData);
+        }
+        if(CACHE.dashboardAdmin) renderAdminCRM(CACHE.dashboardAdmin);
     } else {
-        const rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
-        if(rawData) renderSalesKanban(JSON.parse(rawData)); 
+        if (!CACHE.dashboardSales) {
+            let rawData = await apiCall('getSalesmanData', { user: CURRENT_USER.name });
+            if(rawData) CACHE.dashboardSales = JSON.parse(rawData);
+        }
+        if(CACHE.dashboardSales) renderSalesKanban(CACHE.dashboardSales); 
     }
 }
 
@@ -541,6 +586,7 @@ function renderSalesKanban(data) {
     document.getElementById('app').innerHTML = html;
 }
 
+// 🚀 Fast Cached Wings toggle
 async function toggleWings(id) {
     let wing = document.getElementById(`wings_${id}`);
     if (wing.classList.contains('active')) { wing.classList.remove('active'); return; }
@@ -549,7 +595,11 @@ async function toggleWings(id) {
     document.querySelectorAll('.wings-panel').forEach(p => p.classList.remove('active'));
     wing.classList.add('active');
     
-    const h = await apiCall('getHistory', { id: id });
+    if(!CACHE.history[id]) {
+        CACHE.history[id] = await apiCall('getHistory', { id: id });
+    }
+    
+    const h = CACHE.history[id];
     if(h && h.length > 0) document.getElementById(`his_${id}`).innerHTML = h.map(x => `<b>${x.date}</b>: ${x.note}`).join('<br>');
     else document.getElementById(`his_${id}`).innerHTML = "No call history found.";
 }
@@ -560,7 +610,11 @@ async function saveCallNote(id) {
     document.getElementById(`cn_${id}`).value = "Saving...";
     await apiCall('addCallNote', { id: id, note: note, agent: CURRENT_USER.name });
     showToast("Note Added!");
-    toggleWings(id); // Reload wings
+    
+    CACHE.history[id] = null; // 🚀 Clear local history cache so it re-fetches
+    let wing = document.getElementById(`wings_${id}`);
+    wing.classList.remove('active');
+    toggleWings(id); 
 }
 
 function openMeetingModal(id, name, prod) {
@@ -582,6 +636,7 @@ async function saveMeeting() {
     
     showToast("Meeting Scheduled!");
     document.getElementById('meetingModal').style.display = 'none';
+    CACHE.history[id] = null; // 🚀 Clear history cache
 }
 
 async function openKanbanModal(id, status, date, rem, erp) {
@@ -605,18 +660,22 @@ async function saveLead() {
     const res = await apiCall('processLeadUpdate', { data: p }); 
     showToast("Update Saved! Reloading..."); 
     closeModal(); 
+    clearCache(); // 🚀 Clear board cache
     setTimeout(() => { loadCRMTab(); }, 2000); // 2 Sec Delay
 }
 
 // ----------------------------------------------------
-// 🧾 REQUISITION MODULE (PRIVACY & CONVEYANCE FIXED)
+// 🧾 REQUISITION MODULE (CACHED)
 // ----------------------------------------------------
 let allRequisitions = [];
 
 async function loadHRTab() {
     const appDiv = document.getElementById('app');
-    appDiv.innerHTML = `<h3 style="text-align:center; padding:30px;">Loading Requisitions...</h3>`;
-    allRequisitions = await apiCall('getRequisitions') || [];
+    
+    if (!CACHE.requisitions) {
+        CACHE.requisitions = await apiCall('getRequisitions') || [];
+    }
+    allRequisitions = CACHE.requisitions;
     
     let isTL = CURRENT_USER.role.includes('Team Leader');
     let isAdmin = CURRENT_USER.department === 'System Control' || CURRENT_USER.department === 'Admin & HR Logistic';
@@ -717,24 +776,30 @@ async function submitReq() {
     
     let reqData = { user: CURRENT_USER.name, dept: CURRENT_USER.department, amount: amt, reqType: type, category: cat, payMode: mode, purpose: pur, attachment: att };
     let res = await apiCall('createRequisition', { data: reqData });
-    showToast("Submitted! Reloading..."); document.getElementById('reqModal').style.display='none'; 
+    showToast("Submitted! Reloading..."); 
+    document.getElementById('reqModal').style.display='none'; 
+    clearCache(); // 🚀 Clear cache
     setTimeout(() => { loadHRTab(); }, 2000);
 }
 
 async function approveReq(id, level) {
     if(confirm(`Approve requisition at ${level} level?`)) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Approved' } });
-        showToast("Approved! Reloading..."); setTimeout(() => { loadHRTab(); }, 2000);
+        showToast("Approved! Reloading..."); 
+        clearCache(); // 🚀 Clear cache
+        setTimeout(() => { loadHRTab(); }, 2000);
     }
 }
 async function rejectReq(id, level) {
     if(confirm(`Reject this requisition?`)) {
         let res = await apiCall('updateReqStatus', { data: { id: id, level: level, status: 'Rejected' } });
-        showToast("Rejected! Reloading..."); setTimeout(() => { loadHRTab(); }, 2000);
+        showToast("Rejected! Reloading..."); 
+        clearCache(); // 🚀 Clear cache
+        setTimeout(() => { loadHRTab(); }, 2000);
     }
 }
 
-// 🖨️ PDF Cash Voucher Print Logic (Professional Pad Design)
+// 🖨️ PDF Cash Voucher Print Logic
 function printVoucher(reqId) {
     let req = allRequisitions.find(r => r.id === reqId);
     if(!req) return;
@@ -796,9 +861,14 @@ function printVoucher(reqId) {
 // OLD ADMIN TAB & ACTIONS (UNTOUCHED)
 // ----------------------------------------------------
 async function loadAdminTab() {
-    const rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
-    if(!rawData) return;
-    const data = JSON.parse(rawData);
+    const appDiv = document.getElementById('app');
+    
+    if (!CACHE.dashboardAdmin) {
+        let rawData = await apiCall('getAdminData', { role: CURRENT_USER.role });
+        if(rawData) CACHE.dashboardAdmin = JSON.parse(rawData);
+    }
+    const data = CACHE.dashboardAdmin;
+    if(!data) return;
 
     let html = `
       <div class="card" style="background: linear-gradient(to right, #f1c40f, #f39c12); border: none;">
@@ -820,7 +890,7 @@ async function loadAdminTab() {
       
       <div class="card"><h3 class="header-title">👮 Agent Status (Access Control)</h3><div id="agents">Loading...</div></div>
     `;
-    document.getElementById('app').innerHTML = html;
+    appDiv.innerHTML = html;
 
     let cAgentOpts = '<option value="Round Robin">🔄 Round Robin</option>';
     let agHtml = '<table><tr><th>Name</th><th>Department</th><th>Role</th><th>Status</th><th>Action</th></tr>';
@@ -853,7 +923,7 @@ function renderAdminCRM(data) {
     } else { stHtml += `<tr><td colspan="4" style="text-align:center;">✅ No rejected leads found.</td></tr>`; }
     stHtml += `</tbody></table></div></div>`;
     
-    document.getElementById('app').innerHTML = stHtml;
+    document.getElementById('app').innerHTML += stHtml; // Append to admin tab
 }
 
 async function goVisit() {
@@ -868,7 +938,10 @@ async function goVisit() {
         showToast("Welcome Back! You are ACTIVE.");
     }
 }
-async function toggleAgent(name) { const res = await apiCall('toggleAgentStatus', { name: name }); showToast(res); loadAdminTab(); }
+async function toggleAgent(name) { 
+    const res = await apiCall('toggleAgentStatus', { name: name }); 
+    showToast(res); clearCache(); loadAdminTab(); 
+}
 async function toggleHoliday() {
     if(confirm("Toggle Global Holiday Mode?")) {
         const res = await apiCall('toggleHolidayMode');
@@ -879,9 +952,11 @@ async function toggleHoliday() {
 async function addLead() {
     let p = { name: document.getElementById('cName').value, phone: document.getElementById('cPhone').value, product: document.getElementById('cProd').value, agent: document.getElementById('cAgent').value };
     if(!p.phone) return alert("Phone required!");
-    const res = await apiCall('adminManualEntry', { data: p }); showToast(res); loadAdminTab();
+    const res = await apiCall('adminManualEntry', { data: p }); 
+    showToast(res); clearCache(); loadAdminTab();
 }
 async function reassign(id) {
     let agent = document.getElementById('re_'+id).value; if(!agent) return alert("Select an agent");
-    const res = await apiCall('adminReassignLead', { id: id, agent: agent }); showToast("Reassigned Successfully!"); loadCRMTab();
+    const res = await apiCall('adminReassignLead', { id: id, agent: agent }); 
+    showToast("Reassigned Successfully!"); clearCache(); loadCRMTab();
 }
