@@ -1,9 +1,14 @@
+// ============================================================================
+// 🌟 DIVINE OS - CORE SYSTEM CONFIGURATION
+// ============================================================================
 // ✅ তোমার Google Script Web App URL এখানে বসাও
 const API_URL = "https://script.google.com/macros/s/AKfycbzg7wlyv4_KAqU3eQloifDnntwj4uhI8UDsbCbfSRXFFdGfjv4NLloEl5XKfZBFwBEO/exec";
 
 let CURRENT_USER = null;
 
+// ============================================================================
 // 🎨 MULTI-THEME ENGINE (Supports up to 10+ Themes)
+// ============================================================================
 const themes = ['theme-original', 'theme-enterprise', 'theme-garage'];
 const themeNames = ['🌱 Original Theme', '🏢 Enterprise Mode', '🏎️ Garage Mode'];
 let currentThemeIdx = parseInt(localStorage.getItem('divineThemeIdx') || '0');
@@ -27,7 +32,9 @@ function toggleTheme() {
     applyTheme(nextIdx);
 }
 
-// 🚀 SUPER FAST CACHE SYSTEM
+// ============================================================================
+// 🚀 SUPER FAST CACHE SYSTEM FOR INSTANT LOADING
+// ============================================================================
 let CACHE = {
     dashboardAdmin: null,
     dashboardSales: null,
@@ -45,7 +52,9 @@ function clearCache() {
     CACHE.requisitions = null;
 }
 
-// 🛡️ THE MASTER PERMISSION MATRIX (RBAC) - 🔥 Updated Permissions
+// ============================================================================
+// 🛡️ THE MASTER PERMISSION MATRIX (ROLE BASED ACCESS CONTROL)
+// ============================================================================
 const PERMISSIONS = {
     "Executive Management": ["dashboard", "hr", "reports"], 
     "System Control": ["dashboard", "crm", "bookings", "finance", "commission", "hr", "reports", "admin"],
@@ -57,7 +66,9 @@ const PERMISSIONS = {
     "Office Support": ["dashboard", "hr"]
 };
 
-// 🏷️ MENU LABELS
+// ============================================================================
+// 🏷️ MENU LABELS DEFINITION
+// ============================================================================
 const TAB_NAMES = {
     "dashboard": "📊 Home",
     "crm": "👥 Leads (CRM)",
@@ -71,7 +82,9 @@ const TAB_NAMES = {
     "admin": "⚙️ Admin Control"
 };
 
-// --- CSS Injector for Enterprise UI, Kanban Board, Wings, Voucher, Search & Mobile Card View ---
+// ============================================================================
+// 💅 GLOBAL CSS INJECTOR (ENTERPRISE UI, KANBAN, 360 PROFILE)
+// ============================================================================
 document.head.insertAdjacentHTML("beforeend", `
 <style>
 /* 🌍 1. Core Variables & Base Setup */
@@ -474,6 +487,7 @@ body {
 .tl-green::before { background: #198754; }
 .tl-yellow::before { background: #f1c40f; }
 .tl-blue::before { background: #0d6efd; }
+.tl-orange::before { background: #fd7e14; }
 .tl-red::before { background: #dc3545; }
 .funnel-stage { display: flex; justify-content: space-between; padding: 10px; background: var(--bg-light); margin-bottom: 5px; border-radius: 4px; }
 .live-dot { height: 8px; width: 8px; background-color: #dc3545; border-radius: 50%; display: inline-block; animation: blink 1s infinite; margin-left: 5px; }
@@ -498,8 +512,204 @@ body {
   background: var(--card-bg); display: flex; justify-content: center; align-items: center;
   flex-direction: column;
 }
+
+/* ============================================================================ */
+/* 🌟 NEW: 360-DEGREE CLIENT PROFILE DRAWER (HUBSPOT / ZOHO SAAS STYLE) 🌟 */
+/* ============================================================================ */
+.drawer-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 30, 45, 0.6); z-index: 2999; backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+}
+.profile-drawer {
+    position: fixed; top: 0; right: -650px; width: 100%; max-width: 550px; height: 100vh;
+    background: #f4f7f6; z-index: 3000; transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: -5px 0 30px rgba(0,0,0,0.15); overflow-y: auto; display: flex; flex-direction: column;
+}
+.profile-drawer.open { right: 0; }
+.drawer-header {
+    padding: 20px 25px; background: #ffffff; border-bottom: 1px solid var(--border-soft);
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 10;
+}
+.drawer-body { padding: 25px; flex: 1; }
+.profile-card {
+    background: #ffffff; border-radius: 10px; padding: 20px; margin-bottom: 20px;
+    border: 1px solid var(--border-soft); box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+.profile-avatar {
+    width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-bg) 0%, #17a2b8 100%);
+    color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: bold; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+.info-item label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 3px; letter-spacing: 0.5px;}
+.info-item div { font-size: 14px; color: var(--text-main); font-weight: 600; }
+.clickable-row { cursor: pointer; transition: background 0.2s ease; }
+.clickable-row:hover { background: #f8f9fa; }
+
+/* 🌟 NEW: Tabs for 360-Degree Profile 🌟 */
+.profile-tabs { display: flex; border-bottom: 1px solid var(--border-soft); margin-bottom: 20px; }
+.p-tab { padding: 12px 20px; cursor: pointer; border-bottom: 3px solid transparent; font-weight: bold; color: var(--text-muted); font-size:13px; transition:0.3s; }
+.p-tab:hover { color: var(--primary-bg); }
+.p-tab.active { border-bottom-color: var(--primary-bg); color: var(--primary-bg); }
+.p-tab-content { display: none; animation: fadeIn 0.4s ease; }
+.p-tab-content.active { display: block; }
 </style>`);
 
+// ============================================================================
+// 🌟 360-DEGREE CLIENT PROFILE LOGIC (THE SECRET ENTERPRISE FEATURE)
+// ============================================================================
+function injectProfileDrawer() {
+    if(document.getElementById('profileDrawer')) return; // Already injected
+    
+    let html = `
+    <div id="drawerOverlay" class="drawer-overlay" onclick="close360Profile()"></div>
+    <div id="profileDrawer" class="profile-drawer">
+        <div class="drawer-header">
+            <h3 style="margin:0; font-size:18px; color:var(--text-main);">🔍 Client 360° View</h3>
+            <button onclick="close360Profile()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✖</button>
+        </div>
+        <div class="drawer-body" id="drawerBodyContent">
+            </div>
+    </div>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+}
+
+// Tab Switching Logic Inside Drawer
+function switchProfileTab(tabName) {
+    document.querySelectorAll('.p-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.p-tab').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('ptab_' + tabName).classList.add('active');
+    document.getElementById('pbtn_' + tabName).classList.add('active');
+}
+
+function open360Profile(name, phone, project, status, paid, due, agent) {
+    injectProfileDrawer();
+    
+    // Generate Initials for Avatar
+    let initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    // Determine Traffic Light Status for Due Amount
+    let dueAmount = parseInt(due.toString().replace(/,/g, '')) || 0;
+    let dueAlertHTML = '';
+    
+    if(dueAmount > 0) {
+        // Mock logic: randomly decide days overdue for visual demo
+        let days = Math.floor(Math.random() * 15) + 1; 
+        let color = days > 10 ? '#dc3545' : (days > 3 ? '#fd7e14' : '#f1c40f');
+        dueAlertHTML = `
+        <div style="margin-top:10px; padding:10px; background:rgba(220,53,69,0.05); border-left:3px solid ${color}; font-size:12px; font-weight:bold; color:${color};">
+            ⚠ Payment is ${days} days overdue! (Follow up required)
+        </div>`;
+    }
+
+    let contentHTML = `
+        <div class="profile-card" style="display:flex; align-items:center;">
+            <div class="profile-avatar">${initials}</div>
+            <div style="flex:1;">
+                <h2 style="margin:0 0 5px 0; font-size:20px; color:var(--text-main);">${name}</h2>
+                <div style="font-size:13px; color:var(--text-muted);">Assigned to: <b style="color:var(--primary-bg);">${agent}</b></div>
+            </div>
+            <div>
+                <span class="badge k-green" style="font-size:12px; padding:6px 12px;">${status}</span>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <a href="tel:${phone}" class="btn btn-blue" style="flex:1; text-align:center; text-decoration:none;">📱 Call Client</a>
+            <a href="https://wa.me/${phone}" target="_blank" class="btn btn-green" style="flex:1; text-align:center; text-decoration:none; background:#25D366;">💬 WhatsApp</a>
+            <button class="btn btn-gold" style="flex:1;">+ Add Note</button>
+        </div>
+
+        <div class="profile-tabs">
+            <div id="pbtn_overview" class="p-tab active" onclick="switchProfileTab('overview')">Overview</div>
+            <div id="pbtn_financials" class="p-tab" onclick="switchProfileTab('financials')">Financials</div>
+            <div id="pbtn_activity" class="p-tab" onclick="switchProfileTab('activity')">Activity Log</div>
+        </div>
+
+        <div id="ptab_overview" class="p-tab-content active">
+            <div class="profile-card">
+                <h3 class="card-title" style="margin-bottom:15px; border:none; padding:0;">💼 General Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Interested Project</label>
+                        <div>${project}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Lead Source</label>
+                        <div>Facebook Ads</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone Number</label>
+                        <div>${phone}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Current Stage</label>
+                        <div>${status}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ptab_financials" class="p-tab-content">
+            <div class="profile-card">
+                <h3 class="card-title" style="margin-bottom:15px; border:none; padding:0;">💵 Ledger Summary</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Total Paid</label>
+                        <div style="color:#198754; font-size:18px;">৳ ${paid}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>Outstanding Due</label>
+                        <div style="color:#dc3545; font-size:18px;">৳ ${due}</div>
+                    </div>
+                </div>
+                ${dueAlertHTML}
+                
+                <button class="btn btn-green btn-sm" style="width:100%; margin-top:15px; padding:10px;">💳 Add Manual Payment</button>
+            </div>
+        </div>
+
+        <div id="ptab_activity" class="p-tab-content">
+            <div class="profile-card">
+                <h3 class="card-title" style="margin-bottom:15px; border:none; padding:0;">⚡ Engagement History</h3>
+                <div class="timeline-item tl-green">
+                    <span class="detail-text" style="font-size:10px;">Last Week</span><br>
+                    <b style="font-size:13px; color:var(--text-main);">Payment Received (৳ ${paid})</b><br>
+                    <span style="font-size:11px; color:var(--text-muted);">Verified by Accounts</span>
+                </div>
+                <div class="timeline-item tl-blue">
+                    <span class="detail-text" style="font-size:10px;">2 Weeks Ago</span><br>
+                    <b style="font-size:13px; color:var(--text-main);">Site Visit Completed</b><br>
+                    <span style="font-size:11px; color:var(--text-muted);">Client liked the east-facing plot.</span>
+                </div>
+                <div class="timeline-item tl-yellow">
+                    <span class="detail-text" style="font-size:10px;">3 Weeks Ago</span><br>
+                    <b style="font-size:13px; color:var(--text-main);">Initial Call</b><br>
+                    <span style="font-size:11px; color:var(--text-muted);">Lead generated from Facebook Campaign.</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('drawerBodyContent').innerHTML = contentHTML;
+    document.getElementById('drawerOverlay').style.display = 'block';
+    setTimeout(() => { document.getElementById('profileDrawer').classList.add('open'); }, 10);
+}
+
+function close360Profile() {
+    let drawer = document.getElementById('profileDrawer');
+    if(drawer) {
+        drawer.classList.remove('open');
+        setTimeout(() => { document.getElementById('drawerOverlay').style.display = 'none'; }, 300);
+    }
+}
+
+// ============================================================================
+// 🔔 UTILITY FUNCTIONS
+// ============================================================================
 function showToast(msg) { 
     var x = document.getElementById("toast"); 
     x.innerText = msg; 
@@ -530,9 +740,9 @@ async function apiCall(action, payload = {}) {
     }
 }
 
-// ----------------------------------------------------
+// ============================================================================
 // LOGIN & ROUTING LOGIC
-// ----------------------------------------------------
+// ============================================================================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -607,6 +817,9 @@ function initERP() {
 
     // 💡 ম্যাজিক ফিক্স: পেজ লোড হওয়ার সাথে সাথে মেমোরি থেকে সেভ করা থিমটা অ্যাপ্লাই করে দাও!
     applyTheme(currentThemeIdx); 
+    
+    // 🔥 ইনজেক্ট প্রোফাইল ড্রয়ার ইন বডি (For Enterprise Client View) 🔥
+    injectProfileDrawer();
 
     renderNav(CURRENT_USER.department);
     switchTab('dashboard'); 
@@ -727,26 +940,55 @@ async function executeGlobalSearch() {
     searchModal.style.display = 'block';
 }
 
-
-// ----------------------------------------------------
-// 🌟 DYNAMIC DASHBOARD ROUTER (CEO vs Marketing vs TL vs Sales vs Accounts)
-// ----------------------------------------------------
+// ============================================================================
+// 🌟 DYNAMIC DASHBOARD ROUTER (All 10 Specialized Roles)
+// ============================================================================
 async function loadDashboardTab() {
     const appDiv = document.getElementById('app');
     
-    // 🔥 ROUTE 1: Marketing Department
+    // 🔥 ROUTE 1: Marketing Department (Notion+Trello+Ads Workspace)
     if (CURRENT_USER.department === 'Marketing Department') {
         loadMarketingTab();
         return;
     }
     
     // 🔥 ROUTE 5: Accounts & Finance Department (The Money Center)
-    if (CURRENT_USER.department === 'CR & Accounts') {
+    if (CURRENT_USER.department === 'CR & Accounts' && CURRENT_USER.role.includes('Account')) {
         loadAccountsTab();
         return;
     }
+
+    // 🔥 ROUTE 6: CR Executive (Customer Relations - Recovery Engine)
+    if (CURRENT_USER.department === 'CR & Accounts' && CURRENT_USER.role.includes('CR')) {
+        loadCRTab();
+        return;
+    }
     
-    // 🔥 ROUTE 2: Executive Management (CEO / System Control)
+    // 🔥 ROUTE 7: Office Assistant / Peon (Logistics Hub)
+    if (CURRENT_USER.department === 'Admin & HR Logistic' && (CURRENT_USER.role.includes('Assistant') || CURRENT_USER.role.includes('Peon'))) {
+        loadOfficeAssistantTab();
+        return;
+    }
+
+    // 🔥 ROUTE 8: Front Desk / Receptionist (The Reception Hub)
+    if (CURRENT_USER.department === 'Admin & HR Logistic' && (CURRENT_USER.role.includes('Front Desk') || CURRENT_USER.role.includes('Receptionist') || CURRENT_USER.role.includes('Reception'))) {
+        loadFrontDeskTab();
+        return;
+    }
+
+    // 🔥 ROUTE 10: HR Officer (People Control Center)
+    if (CURRENT_USER.department === 'Admin & HR Logistic' && CURRENT_USER.role.includes('HR')) {
+        loadHROfficerTab();
+        return;
+    }
+
+    // 🔥 ROUTE 9: Admin & HR Logistic -> Admin (Company Control Center)
+    if (CURRENT_USER.department === 'Admin & HR Logistic' && CURRENT_USER.role.includes('Admin')) {
+        loadAdminControlCenterTab();
+        return;
+    }
+    
+    // 🔥 ROUTE 2: Executive Management (MD / CEO / Strategic Control Center) 🔥
     if(CURRENT_USER.department === 'Executive Management' || CURRENT_USER.department === 'System Control') {
         
         if (!CACHE.dashboardAdmin) {
@@ -765,12 +1007,8 @@ async function loadDashboardTab() {
         let totalDue = d.financeStats.due || 0;
         let bkgCount = d.financeStats.bkgCount || 0;
 
-        // Visual Bar Calculation
-        let colPct = totalRev > 0 ? Math.round((totalCol / totalRev) * 100) : 0;
-        let expPct = totalCol > 0 ? Math.round((totalExp / totalCol) * 100) : 0;
-        
         let topAgentsHTML = ``;
-        if (d.topAgents.length > 0) {
+        if (d.topAgents && d.topAgents.length > 0) {
             d.topAgents.forEach(a => {
                 topAgentsHTML += `
                 <tr style="border-bottom:1px solid var(--border-soft);">
@@ -785,96 +1023,170 @@ async function loadDashboardTab() {
 
         appDiv.innerHTML = `
         <div style="animation: fadeIn 0.5s;">
-            <h2 class="page-title">Executive Dashboard</h2>
-            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h2 class="page-title" style="margin:0;">👑 Executive Control Center</h2>
+                    <p class="detail-text" style="margin:0;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-gold btn-sm">✨ AI Insights</button>
+                    <button class="btn btn-blue btn-sm" onclick="switchTab('reports')">📊 Master Report</button>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(to right, #0f4c3a, #198754); padding: 15px 20px; border-radius: 8px; color: #fff; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2); flex-wrap:wrap; gap:15px;">
+                <div style="flex:1;">
+                    <b style="font-size: 14px;">🤖 AI Business Insights</b>
+                    <div style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+                        <span style="margin-right: 15px;">📈 Sales increased 22% this month.</span>
+                        <span style="margin-right: 15px;">📉 Marketing CPL increased by 15%.</span>
+                        <span>💰 Recovery performance improved by 10%.</span>
+                    </div>
+                </div>
+                <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px; min-width: 200px;">
+                    <b style="font-size: 14px; color: #ffc107;">⚠️ Risk Indicators</b>
+                    <div style="font-size: 12px; margin-top: 5px;">High outstanding due (৳${(totalDue/100000).toFixed(2)}L)</div>
+                </div>
+            </div>
+
             <div class="kpi-grid">
-                <div class="card" style="margin-bottom:0;">
-                    <div class="kpi-label">Total Deals Closed</div>
-                    <div class="kpi-value">${bkgCount}</div>
-                    <div class="detail-text">All time successful bookings</div>
+                <div class="card" style="margin-bottom:0; border-bottom: 4px solid #198754;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="kpi-label" style="color:#198754;">Total Revenue</div>
+                        <span class="badge k-green" style="font-size:10px;">+15%</span>
+                    </div>
+                    <div class="kpi-value" style="color:#198754;">৳ ${(totalRev/100000).toFixed(2)}L</div>
+                    <div class="bar-wrap" style="height:6px; margin:5px 0; background:#eaedf1;"><div class="bar-fill" style="width:55%; background:#198754;"></div></div>
+                    <div class="detail-text" style="font-size:11px; display:flex; justify-content:space-between;"><span>Goal: 10L</span><span>55% Achieved</span></div>
                 </div>
-                <div class="card" style="margin-bottom:0;">
-                    <div class="kpi-label">Gross Revenue</div>
-                    <div class="kpi-value" style="color:#f39c12">৳ ${(totalRev/100000).toFixed(2)}L</div>
-                    <div class="detail-text">Total sales volume generated</div>
+                
+                <div class="card" style="margin-bottom:0; border-bottom: 4px solid #0d6efd;">
+                    <div class="kpi-label" style="color:#0d6efd;">Deals Closed</div>
+                    <div class="kpi-value" style="color:#0d6efd;">${bkgCount}</div>
+                    <div class="detail-text">Total successful bookings</div>
                 </div>
-                <div class="card" style="margin-bottom:0;">
-                    <div class="kpi-label">Amount Collected</div>
-                    <div class="kpi-value" style="color:#0dcaf0">৳ ${(totalCol/100000).toFixed(2)}L</div>
+                
+                <div class="card" style="margin-bottom:0; border-bottom: 4px solid #f39c12;">
+                    <div class="kpi-label" style="color:#f39c12;">Cash Collected</div>
+                    <div class="kpi-value" style="color:#f39c12;">৳ ${(totalCol/100000).toFixed(2)}L</div>
                     <div class="detail-text">Cash received in bank</div>
                 </div>
-                <div class="card" style="margin-bottom:0;">
-                    <div class="kpi-label">Outstanding Due</div>
-                    <div class="kpi-value" style="color:#dc3545">৳ ${(totalDue/100000).toFixed(2)}L</div>
+                
+                <div class="card" style="margin-bottom:0; border-bottom: 4px solid #dc3545;">
+                    <div class="kpi-label" style="color:#dc3545;">Outstanding Due</div>
+                    <div class="kpi-value" style="color:#dc3545;">৳ ${(totalDue/100000).toFixed(2)}L</div>
                     <div class="detail-text">Pending collections</div>
                 </div>
             </div>
 
             <div class="main-grid" style="margin-bottom: 24px;">
                 <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
-                    <h3 class="card-title">🚨 Action Required (System Alerts)</h3>
-                    <div style="background:rgba(241, 196, 15, 0.1); padding:12px; border-radius:6px; margin-bottom:10px; color:#b8860b; font-weight:600; border-left:4px solid #f1c40f; display:flex; justify-content:space-between; align-items:center;">
-                        <span>⚠ 12 Installments Overdue</span> <button class="btn btn-gold btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;">View</button>
-                    </div>
+                    <h3 class="card-title">🚨 Strategic Alerts (Action Required)</h3>
                     <div style="background:rgba(220, 53, 69, 0.1); padding:12px; border-radius:6px; margin-bottom:10px; color:#dc3545; font-weight:600; border-left:4px solid #dc3545; display:flex; justify-content:space-between; align-items:center;">
-                        <span>🧾 3 Requisitions Pending Approval</span> <button class="btn btn-red btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;" onclick="switchTab('hr')">Review</button>
+                        <span>⚠ 12 Installments Overdue</span> <button class="btn btn-red btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;">View Details</button>
+                    </div>
+                    <div style="background:rgba(241, 196, 15, 0.1); padding:12px; border-radius:6px; margin-bottom:10px; color:#b8860b; font-weight:600; border-left:4px solid #f1c40f; display:flex; justify-content:space-between; align-items:center;">
+                        <span>🧾 3 Large Requisitions Pending</span> <button class="btn btn-gold btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;" onclick="switchTab('hr')">Review</button>
                     </div>
                     <div style="background:rgba(108, 117, 125, 0.1); padding:12px; border-radius:6px; color:#6c757d; font-weight:600; border-left:4px solid #6c757d; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📞 8 New Leads Not Contacted</span> <button class="btn btn-gray btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;" onclick="switchTab('crm')">Track</button>
+                        <span>📉 Low Performing Campaign Detected</span> <button class="btn btn-gray btn-sm" style="padding:4px 10px; font-size:11px; border-radius:4px;">Assign</button>
                     </div>
                 </div>
 
                 <div class="card" style="margin-bottom:0;">
-                    <h3 class="card-title">📈 Q1 Revenue Trend (৳)</h3>
-                    <div style="display:flex; align-items:flex-end; gap:15px; height:120px; padding-top:10px; border-bottom:2px solid var(--border-soft); margin-bottom:20px;">
-                        <div style="flex:1; background:var(--border-soft); height:40%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Jan: 2.5L" onmouseover="this.style.background='var(--text-muted)'" onmouseout="this.style.background='var(--border-soft)'">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 class="card-title" style="margin:0; border:none;">📈 Company Revenue Trend (Q1)</h3>
+                        <span class="badge k-green">Upward</span>
+                    </div>
+                    <div style="display:flex; align-items:flex-end; gap:15px; height:120px; padding-top:10px; border-bottom:2px solid var(--border-soft);">
+                        <div style="flex:1; background:var(--border-soft); height:40%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Jan: 3.2L">
                             <span style="position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:bold; color:var(--text-muted);">JAN</span>
                         </div>
-                        <div style="flex:1; background:var(--btn-color); height:65%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Feb: 3.8L" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        <div style="flex:1; background:var(--btn-color); height:65%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Feb: 4.8L">
                             <span style="position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:bold; color:var(--text-muted);">FEB</span>
                         </div>
-                        <div style="flex:1; background:var(--primary-bg); height:95%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Mar: 5.50L" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        <div style="flex:1; background:var(--primary-bg); height:95%; border-radius:4px 4px 0 0; position:relative; transition:0.3s; cursor:pointer;" title="Mar: 5.50L">
                             <span style="position:absolute; bottom:-22px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:bold; color:var(--text-muted);">MAR</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="main-grid">
+            <div class="main-grid" style="margin-bottom: 24px;">
                 <div class="card" style="margin-bottom:0;">
-                    <h3 class="card-title">Core Financial Health</h3>
-                    
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span class="detail-text">Gross Revenue target pool</span> 
-                        <b style="color:var(--text-main);">৳ ${totalRev.toLocaleString()}</b>
-                    </div>
-                    
-                    <div style="display:flex; justify-content:space-between; margin-top:15px;">
-                        <span style="font-weight:600; color:var(--btn-color);">Collection Progress</span> 
-                        <b style="color:var(--btn-color);">৳ ${totalCol.toLocaleString()}</b>
-                    </div>
-                    <div class="bar-wrap">
-                        <div class="bar-fill" style="width:${colPct}%; background:var(--btn-color);"></div>
-                    </div>
-                    <div class="detail-text" style="text-align:right;">Collection Ratio: ${colPct}%</div>
-                    
-                    <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                        <span style="font-weight:600; color:#dc3545;">Operational Expenses</span> 
-                        <b style="color:#dc3545;">৳ ${totalExp.toLocaleString()}</b>
-                    </div>
-                    <div class="bar-wrap">
-                        <div class="bar-fill" style="width:${expPct}%; background:#dc3545;"></div>
-                    </div>
-                    <div class="detail-text" style="text-align:right;">Expense Ratio: ${expPct}% of collected</div>
-                    
-                    <div style="margin-top:25px; padding:15px; background:var(--bg-light); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:600; font-size:15px;">Net Cash in Hand</span>
-                        <span style="font-size:22px; font-weight:800; color:var(--primary-bg);">৳ ${(totalCol - totalExp).toLocaleString()}</span>
+                    <h3 class="card-title">🏢 Department Performance</h3>
+                    <table style="width:100%; text-align:left; border-collapse:collapse; font-size:13px;">
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--border-soft);">
+                                <td style="padding:10px 0;"><b>Sales</b></td>
+                                <td style="padding:10px 0; text-align:right;"><span class="badge k-blue">12 Deals Closed</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-soft);">
+                                <td style="padding:10px 0;"><b>Marketing</b></td>
+                                <td style="padding:10px 0; text-align:right;"><span class="badge k-green">120 Leads Gen.</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-soft);">
+                                <td style="padding:10px 0;"><b>Accounts</b></td>
+                                <td style="padding:10px 0; text-align:right;"><span class="badge k-yellow">8 Payments Proc.</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border-soft);">
+                                <td style="padding:10px 0;"><b>CR & Recovery</b></td>
+                                <td style="padding:10px 0; text-align:right;"><span class="badge k-red">4 Overdue Rec.</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;"><b>HR & Admin</b></td>
+                                <td style="padding:10px 0; text-align:right;"><span class="badge k-gray">2 New Hires</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card" style="margin-bottom:0; background:linear-gradient(135deg, var(--card-bg) 0%, rgba(13, 110, 253, 0.05) 100%);">
+                    <h3 class="card-title">🏦 Financial Health Panel</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border-soft); box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">Bank Balance</div>
+                            <div style="font-size:18px; color:#0d6efd; font-weight:bold;">৳ 8.50L</div>
+                        </div>
+                        <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border-soft); box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">Accounts Receivable</div>
+                            <div style="font-size:18px; color:#198754; font-weight:bold;">৳ 5.20L</div>
+                        </div>
+                        <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border-soft); box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">Monthly Expenses</div>
+                            <div style="font-size:18px; color:#dc3545; font-weight:bold;">৳ ${(totalExp/100000).toFixed(2)}L</div>
+                        </div>
+                        <div style="background:#fff; padding:12px; border-radius:6px; border:1px solid var(--border-soft); box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">Net Profit (Est.)</div>
+                            <div style="font-size:18px; color:#f39c12; font-weight:bold;">৳ 3.40L</div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="main-grid" style="margin-bottom: 24px;">
                 <div class="card" style="margin-bottom:0;">
-                    <h3 class="card-title">Top Performing Agents</h3>
+                    <h3 class="card-title">📊 Lead Funnel Overview</h3>
+                    <div style="display:flex; gap:5px; text-align:center; overflow-x:auto; padding-bottom:10px;">
+                        <div style="flex:1; min-width:70px; background:rgba(13, 110, 253, 0.1); border:1px solid #0d6efd; padding:10px; border-radius:6px;">
+                            <b style="font-size:18px; color:#0d6efd;">120</b><br><span style="font-size:11px; font-weight:bold; color:var(--text-main);">Leads</span>
+                        </div>
+                        <div style="flex:1; min-width:70px; background:rgba(23, 162, 184, 0.1); border:1px solid #17a2b8; padding:10px; border-radius:6px;">
+                            <b style="font-size:18px; color:#17a2b8;">90</b><br><span style="font-size:11px; font-weight:bold; color:var(--text-main);">Contacted</span>
+                        </div>
+                        <div style="flex:1; min-width:70px; background:rgba(241, 196, 15, 0.1); border:1px solid #f1c40f; padding:10px; border-radius:6px;">
+                            <b style="font-size:18px; color:#f39c12;">40</b><br><span style="font-size:11px; font-weight:bold; color:var(--text-main);">Visits</span>
+                        </div>
+                        <div style="flex:1; min-width:70px; background:rgba(253, 126, 20, 0.1); border:1px solid #fd7e14; padding:10px; border-radius:6px;">
+                            <b style="font-size:18px; color:#fd7e14;">18</b><br><span style="font-size:11px; font-weight:bold; color:var(--text-main);">Negotiation</span>
+                        </div>
+                        <div style="flex:1; min-width:70px; background:rgba(25, 135, 84, 0.1); border:1px solid #198754; padding:10px; border-radius:6px;">
+                            <b style="font-size:18px; color:#198754;">${bkgCount}</b><br><span style="font-size:11px; font-weight:bold; color:var(--text-main);">Closed</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom:0;">
+                    <h3 class="card-title">🏆 Top Performing Agents</h3>
                     <table style="width:100%; text-align:left; border-collapse:collapse;">
                         <thead>
                             <tr style="border-bottom:2px solid var(--border-soft); color:var(--text-muted); font-size:13px;">
@@ -889,6 +1201,54 @@ async function loadDashboardTab() {
                     </table>
                 </div>
             </div>
+
+            <div class="main-grid">
+                <div class="card" style="margin-bottom:0; border-top: 4px solid #198754;">
+                    <h3 class="card-title">🔮 Cash Flow Forecast</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f8f9fa; border-radius:6px; margin-bottom:10px;">
+                        <span style="font-weight:bold; color:var(--text-main); font-size:13px;">Expected Collection (This Month)</span>
+                        <span style="font-weight:bold; color:#198754; font-size:15px;">৳ 6.50L</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f8f9fa; border-radius:6px; margin-bottom:10px;">
+                        <span style="font-weight:bold; color:var(--text-main); font-size:13px;">Expected Expenses</span>
+                        <span style="font-weight:bold; color:#dc3545; font-size:15px;">৳ 2.80L</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(25, 135, 84, 0.1); border-left:4px solid #198754; border-radius:6px;">
+                        <span style="font-weight:bold; color:var(--primary-bg); font-size:14px;">Projected Profit</span>
+                        <span style="font-weight:bold; color:#198754; font-size:18px;">৳ 3.70L</span>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:0; border-top: 4px solid #f39c12;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 class="card-title" style="margin:0; border:none;">✅ Executive Approval Center</h3>
+                        <span class="badge k-yellow">3 Pending</span>
+                    </div>
+                    <div style="height: 150px; overflow-y: auto; padding-right: 5px;">
+                        <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <b style="font-size:13px; color:var(--text-main);">Marketing Budget (Q2)</b>
+                                <span style="font-size:12px; color:#dc3545; font-weight:bold;">৳ 2,50,000</span>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">Approve</button>
+                                <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px; padding:4px;" onclick="switchTab('hr')">Review</button>
+                            </div>
+                        </div>
+                        <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <b style="font-size:13px; color:var(--text-main);">Commission - Mutakkin</b>
+                                <span style="font-size:12px; color:#f39c12; font-weight:bold;">৳ 15,000</span>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">Approve</button>
+                                <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px; padding:4px;">Review</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>`;
     } 
     // 🔥 ROUTE 3: Sales Team Leader Dashboard
@@ -901,6 +1261,7 @@ async function loadDashboardTab() {
             }
         }
         
+        // Mock data for TL
         let teamLeadsToday = 28;
         let totalAssigned = 140;
         let teamBookings = 6;
@@ -1136,15 +1497,15 @@ async function loadDashboardTab() {
                         <span class="badge k-red">Action Needed</span>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div style="padding:12px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; border-radius:4px;">
+                        <div class="clickable-row" style="padding:12px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; border-radius:4px;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Negotiation', '0', '12,50,000', '${CURRENT_USER.name}')">
                             <div style="display:flex; justify-content:space-between;">
                                 <b style="font-size:14px; color:var(--text-main);">Rahim Uddin</b>
                                 <span style="font-size:11px; color:#dc3545; font-weight:bold;">Negotiation</span>
                             </div>
                             <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Project: Plot A12 | ৳ 12,50,000</div>
-                            <button class="btn btn-red btn-sm" style="margin-top:8px; width:100%; font-size:11px;" onclick="switchTab('crm')">Close Deal Now</button>
+                            <button class="btn btn-red btn-sm" style="margin-top:8px; width:100%; font-size:11px;" onclick="event.stopPropagation(); switchTab('crm')">Close Deal Now</button>
                         </div>
-                        <div style="padding:12px; background:rgba(241, 196, 15, 0.05); border-left:3px solid #f1c40f; border-radius:4px;">
+                        <div class="clickable-row" style="padding:12px; background:rgba(241, 196, 15, 0.05); border-left:3px solid #f1c40f; border-radius:4px;" onclick="open360Profile('Shafiqul Islam', '01800000000', 'Cox Holiday Inn', 'Site Visit', '0', '0', '${CURRENT_USER.name}')">
                             <div style="display:flex; justify-content:space-between;">
                                 <b style="font-size:14px; color:var(--text-main);">Shafiqul Islam</b>
                                 <span style="font-size:11px; color:#f39c12; font-weight:bold;">Site Visit</span>
@@ -1162,24 +1523,24 @@ async function loadDashboardTab() {
                     <div style="height: 200px; overflow-y: auto; padding-right: 5px;">
                         <label style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border-soft); cursor:pointer;">
                             <input type="checkbox" style="width:16px; height:16px;">
-                            <div style="flex:1;">
+                            <div style="flex:1;" onclick="open360Profile('Jamil Hossain', '01711000000', 'Pending', 'Follow-up', '0', '0', '${CURRENT_USER.name}')">
                                 <b style="font-size:13px; color:var(--text-main);">Jamil Hossain</b><br>
                                 <span style="font-size:11px; color:var(--text-muted);">Follow-up (10:00 AM)</span>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                <a href="tel:01700000000" style="text-decoration:none; font-size:16px;" title="Direct Call">📱</a>
-                                <a href="https://wa.me/01700000000" target="_blank" style="text-decoration:none; font-size:16px;" title="WhatsApp">💬</a>
+                                <a href="tel:01711000000" style="text-decoration:none; font-size:16px;" title="Direct Call">📱</a>
+                                <a href="https://wa.me/01711000000" target="_blank" style="text-decoration:none; font-size:16px;" title="WhatsApp">💬</a>
                             </div>
                         </label>
                         <label style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border-soft); cursor:pointer;">
                             <input type="checkbox" style="width:16px; height:16px;">
-                            <div style="flex:1;">
+                            <div style="flex:1;" onclick="open360Profile('Karim Bhai', '01811000000', 'Commercial Space', 'New Lead', '0', '0', '${CURRENT_USER.name}')">
                                 <b style="font-size:13px; color:var(--text-main);">Karim Bhai</b><br>
                                 <span style="font-size:11px; color:var(--text-muted);">New Lead (12:30 PM)</span>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                <a href="tel:01700000000" style="text-decoration:none; font-size:16px;">📱</a>
-                                <a href="https://wa.me/01700000000" target="_blank" style="text-decoration:none; font-size:16px;">💬</a>
+                                <a href="tel:01811000000" style="text-decoration:none; font-size:16px;">📱</a>
+                                <a href="https://wa.me/01811000000" target="_blank" style="text-decoration:none; font-size:16px;">💬</a>
                             </div>
                         </label>
                         <label style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid var(--border-soft); cursor:pointer; opacity:0.6;">
@@ -1238,12 +1599,12 @@ async function loadDashboardTab() {
             <div class="main-grid" style="margin-bottom: 24px;">
                 <div class="card" style="margin-bottom:0;">
                     <h3 class="card-title">📅 Upcoming Visits</h3>
-                    <div style="border-left: 2px solid #0d6efd; padding-left: 15px; margin-bottom: 15px;">
+                    <div class="clickable-row" style="border-left: 2px solid #0d6efd; padding-left: 15px; margin-bottom: 15px;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Negotiation', '0', '12,50,000', '${CURRENT_USER.name}')">
                         <span class="detail-text" style="font-size:11px; font-weight:bold;">Tomorrow, 10:00 AM</span><br>
                         <b style="font-size:14px; color:var(--text-main);">Client: Rahim Uddin</b><br>
                         <span style="font-size:12px; color:var(--text-muted);">Project: Plot A12</span>
                     </div>
-                    <div style="border-left: 2px solid #198754; padding-left: 15px;">
+                    <div class="clickable-row" style="border-left: 2px solid #198754; padding-left: 15px;" onclick="open360Profile('Karim', '01800000000', 'Plot B4', 'Site Visit', '0', '0', '${CURRENT_USER.name}')">
                         <span class="detail-text" style="font-size:11px; font-weight:bold;">Friday, 03:00 PM</span><br>
                         <b style="font-size:14px; color:var(--text-main);">Client: Karim</b><br>
                         <span style="font-size:12px; color:var(--text-muted);">Project: Plot B4</span>
@@ -1316,7 +1677,7 @@ async function loadDashboardTab() {
 }
 
 // ----------------------------------------------------
-// 🎯 THE ULTIMATE SAAS MARKETING DASHBOARD
+// 🎯 THE ULTIMATE SAAS MARKETING DASHBOARD (Trello + Notion Style)
 // ----------------------------------------------------
 function loadMarketingTab() {
     const appDiv = document.getElementById('app');
@@ -1405,6 +1766,49 @@ function loadMarketingTab() {
         </div>
 
         <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">🎭 Creative Performance Insights</h3>
+                <div style="margin-bottom:15px; border-bottom:1px dashed var(--border-soft); padding-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:bold; color:var(--text-main); font-size:14px;">Creative A (Video)</span><br>
+                            <span style="font-size:11px; color:var(--text-muted);">CTR: <b>2.8%</b> | CPC: <b>৳15</b> | Conv: <b>8%</b></span>
+                        </div>
+                        <span style="color:#198754; font-weight:bold; font-size:15px;">50 Leads</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:15px; border-bottom:1px dashed var(--border-soft); padding-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:bold; color:var(--text-main); font-size:14px;">Creative B (Carousel)</span><br>
+                            <span style="font-size:11px; color:var(--text-muted);">CTR: <b>1.5%</b> | CPC: <b>৳22</b> | Conv: <b>4%</b></span>
+                        </div>
+                        <span style="color:#0d6efd; font-weight:bold; font-size:15px;">30 Leads</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:bold; color:var(--text-main); font-size:14px;">Creative C (Single Image)</span><br>
+                            <span style="font-size:11px; color:#dc3545;">CTR: <b>0.8%</b> | CPC: <b>৳45</b> (Low)</span>
+                        </div>
+                        <span style="color:#f39c12; font-weight:bold; font-size:15px;">12 Leads</span>
+                    </div>
+                </div>
+
+                <h4 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Overall Lead Quality</h4>
+                <div style="display:flex; height:10px; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+                    <div style="width:40%; background:#198754;" title="High: 40%"></div>
+                    <div style="width:35%; background:#f1c40f;" title="Medium: 35%"></div>
+                    <div style="width:25%; background:#dc3545;" title="Low: 25%"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-main); font-weight:bold;">
+                    <span><span style="color:#198754;">■</span> High (40%)</span>
+                    <span><span style="color:#f1c40f;">■</span> Medium (35%)</span>
+                    <span><span style="color:#dc3545;">■</span> Low (25%)</span>
+                </div>
+            </div>
+
             <div class="card auto-refresh" style="margin-bottom:0; border-top: 4px solid #0d6efd;">
                 <h3 class="card-title">🔄 Lead Distribution Monitor <span class="live-dot"></span></h3>
                 <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
@@ -1421,36 +1825,8 @@ function loadMarketingTab() {
                     <div class="timeline-item tl-yellow">
                         <span class="detail-text" style="font-size:10px;">1 hour ago</span><br>
                         <b style="font-size:13px; color:var(--text-main);">Lead: Jamil (Google Ads)</b><br>
-                        <span style="font-size:11px; color:#f1c40f; font-weight:bold;">➔ Manual Assigned: Shovon</span>
+                        <span style="font-size:11px; color:#f1c40f; font-weight:bold;">➔ Manual Assigned: Hasan</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="card" style="margin-bottom:0;">
-                <h3 class="card-title">🎭 Creative Performance & Quality</h3>
-                
-                <div style="margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                        <span style="font-weight:bold; color:var(--text-main);">Creative A (Video)</span> <span style="color:#198754; font-weight:bold;">50 Leads</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                        <span style="font-weight:bold; color:var(--text-main);">Creative B (Carousel)</span> <span style="color:#0d6efd; font-weight:bold;">30 Leads</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                        <span style="font-weight:bold; color:var(--text-main);">Creative C (Single Image)</span> <span style="color:#f39c12; font-weight:bold;">12 Leads</span>
-                    </div>
-                </div>
-
-                <h4 style="font-size:12px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Lead Quality Score</h4>
-                <div style="display:flex; height:12px; border-radius:6px; overflow:hidden; margin-bottom:8px;">
-                    <div style="width:40%; background:#198754;" title="High: 40%"></div>
-                    <div style="width:35%; background:#f1c40f;" title="Medium: 35%"></div>
-                    <div style="width:25%; background:#dc3545;" title="Low: 25%"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-main); font-weight:bold;">
-                    <span><span style="color:#198754;">■</span> High (40%)</span>
-                    <span><span style="color:#f1c40f;">■</span> Medium (35%)</span>
-                    <span><span style="color:#dc3545;">■</span> Low (25%)</span>
                 </div>
             </div>
         </div>
@@ -1512,12 +1888,83 @@ function loadMarketingTab() {
                 </div>
             </div>
         </div>
+
+        <div class="main-grid">
+            <div class="card" style="margin-bottom:0; overflow-x:auto; border-top: 4px solid #f39c12;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">🎨 Creative Task Board (Designer Workspace)</h3>
+                    <button class="btn btn-blue btn-sm">+ Add Task</button>
+                </div>
+                
+                <div style="display:flex; gap:15px; min-width:600px;">
+                    <div style="flex:1; background:var(--bg-light); padding:10px; border-radius:8px; border:1px solid var(--border-soft);">
+                        <b style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">To Do (2)</b>
+                        <div style="background:#fff; padding:10px; margin-top:10px; border-radius:5px; border-left:3px solid #dc3545; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
+                            <div style="font-size:13px; font-weight:bold; color:var(--text-main);">FB Ad Banner (Cox)</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Due: Today</div>
+                        </div>
+                        <div style="background:#fff; padding:10px; margin-top:10px; border-radius:5px; border-left:3px solid #f1c40f; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
+                            <div style="font-size:13px; font-weight:bold; color:var(--text-main);">Reel Editing (Purbachal)</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Due: Tomorrow</div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1; background:var(--bg-light); padding:10px; border-radius:8px; border:1px solid var(--border-soft);">
+                        <b style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">In Progress (1)</b>
+                        <div style="background:#fff; padding:10px; margin-top:10px; border-radius:5px; border-left:3px solid #0d6efd; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
+                            <div style="font-size:13px; font-weight:bold; color:var(--text-main);">Website Hero Image</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">Working...</div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1; background:var(--bg-light); padding:10px; border-radius:8px; border:1px solid var(--border-soft);">
+                        <b style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Approved (1)</b>
+                        <div style="background:#fff; padding:10px; margin-top:10px; border-radius:5px; border-left:3px solid #198754; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
+                            <div style="font-size:13px; font-weight:bold; color:var(--text-main);">Visa Campaign Post</div>
+                            <div style="font-size:11px; color:#198754; font-weight:bold; margin-top:5px;">Ready to publish</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📁 Brand Asset Center</h3>
+                    <button class="btn btn-green btn-sm">↑ Upload Asset</button>
+                </div>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                    <div style="padding:15px; border:1px solid var(--border-soft); border-radius:6px; text-align:center; cursor:pointer; background:#f8f9fa;">
+                        <div style="font-size:24px; margin-bottom:5px;">🎨</div>
+                        <b style="font-size:13px; color:var(--text-main);">Logo Pack (PNG/SVG)</b>
+                    </div>
+                    <div style="padding:15px; border:1px solid var(--border-soft); border-radius:6px; text-align:center; cursor:pointer; background:#f8f9fa;">
+                        <div style="font-size:24px; margin-bottom:5px;">📐</div>
+                        <b style="font-size:13px; color:var(--text-main);">Brand Guidelines</b>
+                    </div>
+                    <div style="padding:15px; border:1px solid var(--border-soft); border-radius:6px; text-align:center; cursor:pointer; background:#f8f9fa;">
+                        <div style="font-size:24px; margin-bottom:5px;">🎬</div>
+                        <b style="font-size:13px; color:var(--text-main);">Raw Video Footage</b>
+                    </div>
+                    <div style="padding:15px; border:1px solid var(--border-soft); border-radius:6px; text-align:center; cursor:pointer; background:#f8f9fa;">
+                        <div style="font-size:24px; margin-bottom:5px;">📝</div>
+                        <b style="font-size:13px; color:var(--text-main);">Ad Copy Docs</b>
+                    </div>
+                </div>
+
+                <div style="background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; padding:10px; border-radius:4px;">
+                    <b style="font-size:12px; color:#dc3545; text-transform:uppercase;">🚨 Urgent Request from Sales</b>
+                    <div style="font-size:13px; color:var(--text-main); margin-top:4px;">"Need a fast FB Story for today's property fair at Cox's Bazar."</div>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Requested by: Mutakkin (10 mins ago)</div>
+                </div>
+            </div>
+        </div>
     </div>
     `;
 }
 
 // ----------------------------------------------------
-// 💵 ACCOUNTS & FINANCE DASHBOARD (The Money Center)
+// 💵 ACCOUNTS & FINANCE DASHBOARD (The Money Center - Polished)
 // ----------------------------------------------------
 function loadAccountsTab() {
     const appDiv = document.getElementById('app');
@@ -1563,48 +2010,74 @@ function loadAccountsTab() {
             <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
                 <h3 class="card-title">🚨 Overdue Installments (Critical)</h3>
                 <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
-                    <div style="padding:12px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; border-radius:4px; margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <b style="font-size:14px; color:var(--text-main);">Rahim Uddin (Plot A12)</b>
-                            <span style="font-size:11px; color:#dc3545; font-weight:bold;">5 Days Overdue</span>
+                    
+                    <div style="padding:15px; background:rgba(220, 53, 69, 0.05); border-left:4px solid #dc3545; border-radius:6px; margin-bottom:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:15px; color:var(--text-main); text-decoration:underline; cursor:pointer;" onclick="open360Profile('Shafiq Islam', '01800000000', 'Cox Hotel', 'Overdue', '50,000', '2,00,000', 'Rakib')">Shafiq Islam (Cox Hotel)</b>
+                            <span class="badge k-red" style="font-size:12px;">12 Days Overdue</span>
                         </div>
-                        <div style="font-size:14px; font-weight:bold; color:#dc3545; margin-top:4px;">৳ 1,50,000</div>
-                        <div style="margin-top:8px; display:flex; gap:5px;">
-                            <button class="btn btn-red btn-sm" style="flex:1; font-size:11px;">Notify Sales Agent</button>
-                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px;">Send SMS</button>
-                        </div>
-                    </div>
-                    <div style="padding:12px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; border-radius:4px;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <b style="font-size:14px; color:var(--text-main);">Shafiq Islam (Cox Hotel)</b>
-                            <span style="font-size:11px; color:#dc3545; font-weight:bold;">12 Days Overdue</span>
-                        </div>
-                        <div style="font-size:14px; font-weight:bold; color:#dc3545; margin-top:4px;">৳ 2,00,000</div>
-                        <div style="margin-top:8px; display:flex; gap:5px;">
-                            <button class="btn btn-red btn-sm" style="flex:1; font-size:11px;">Notify Sales Agent</button>
-                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px;">Send SMS</button>
+                        <div style="font-size:16px; font-weight:bold; color:#dc3545; margin-top:8px;">৳ 2,00,000</div>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <button class="btn btn-red btn-sm" style="flex:1; font-size:12px;">Notify Sales Agent</button>
+                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:12px;">Send SMS Warning</button>
                         </div>
                     </div>
+                    
+                    <div style="padding:15px; background:rgba(253, 126, 20, 0.05); border-left:4px solid #fd7e14; border-radius:6px; margin-bottom:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:15px; color:var(--text-main); text-decoration:underline; cursor:pointer;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Overdue', '1,00,000', '1,50,000', 'Hasan')">Rahim Uddin (Plot A12)</b>
+                            <span class="badge k-orange" style="background:#fd7e14; color:#fff; font-size:12px;">5 Days Overdue</span>
+                        </div>
+                        <div style="font-size:16px; font-weight:bold; color:#fd7e14; margin-top:8px;">৳ 1,50,000</div>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <button class="btn btn-orange btn-sm" style="flex:1; font-size:12px; background:#fd7e14; color:#fff; border:none; border-radius:4px;">Notify Sales Agent</button>
+                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:12px;">Send SMS</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:15px; background:rgba(241, 196, 15, 0.05); border-left:4px solid #f1c40f; border-radius:6px; margin-bottom:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:15px; color:var(--text-main); text-decoration:underline; cursor:pointer;" onclick="open360Profile('Jamil Hossain', '01900000000', 'Commercial', 'Overdue', '5,00,000', '50,000', 'Mutakkin')">Jamil Hossain (Commercial)</b>
+                            <span class="badge k-yellow" style="font-size:12px;">2 Days Overdue</span>
+                        </div>
+                        <div style="font-size:16px; font-weight:bold; color:#f39c12; margin-top:8px;">৳ 50,000</div>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <button class="btn btn-gold btn-sm" style="flex:1; font-size:12px;">Call Client</button>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
 
             <div class="card" style="margin-bottom:0; border-top: 4px solid #f39c12;">
                 <h3 class="card-title">📅 Upcoming Installments</h3>
                 <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
-                    <div style="border-left: 2px solid #f39c12; padding-left: 15px; margin-bottom: 15px;">
-                        <span class="detail-text" style="font-size:11px; font-weight:bold;">Due: 10 March</span><br>
-                        <b style="font-size:14px; color:var(--text-main);">Rahim Uddin</b> (Plot A12)<br>
-                        <span style="font-size:13px; font-weight:bold; color:#198754;">৳ 1,50,000</span>
+                    <div style="border-left: 2px solid #f39c12; padding-left: 15px; margin-bottom: 20px;">
+                        <span class="detail-text" style="font-size:12px; font-weight:bold;">Due: 10 March</span><br>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                            <div>
+                                <b class="clickable-row" style="font-size:15px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Abdul Kuddus', '01722000000', 'Plot A12', 'Active', '1,00,000', '1,50,000', 'Hasan')">Abdul Kuddus</b> <span style="color:var(--text-muted); font-size:12px;">(Plot A12)</span><br>
+                                <span style="font-size:14px; font-weight:bold; color:#198754;">৳ 1,50,000</span>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <a href="https://wa.me/01722000000" target="_blank" style="text-decoration:none; font-size:20px;" title="Send WhatsApp Reminder">💬</a>
+                                <a href="sms:01722000000" style="text-decoration:none; font-size:20px;" title="Send SMS Reminder">✉️</a>
+                            </div>
+                        </div>
                     </div>
-                    <div style="border-left: 2px solid #f39c12; padding-left: 15px; margin-bottom: 15px;">
-                        <span class="detail-text" style="font-size:11px; font-weight:bold;">Due: 12 March</span><br>
-                        <b style="font-size:14px; color:var(--text-main);">Karim Islam</b> (Flat B4)<br>
-                        <span style="font-size:13px; font-weight:bold; color:#198754;">৳ 2,00,000</span>
-                    </div>
-                    <div style="border-left: 2px solid #f39c12; padding-left: 15px;">
-                        <span class="detail-text" style="font-size:11px; font-weight:bold;">Due: 15 March</span><br>
-                        <b style="font-size:14px; color:var(--text-main);">Nusrat Jahan</b> (Commercial Space)<br>
-                        <span style="font-size:13px; font-weight:bold; color:#198754;">৳ 5,00,000</span>
+                    
+                    <div style="border-left: 2px solid #f39c12; padding-left: 15px; margin-bottom: 20px;">
+                        <span class="detail-text" style="font-size:12px; font-weight:bold;">Due: 12 March</span><br>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                            <div>
+                                <b class="clickable-row" style="font-size:15px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Karim Islam', '01811000000', 'Flat B4', 'Active', '5,00,000', '2,00,000', 'Rakib')">Karim Islam</b> <span style="color:var(--text-muted); font-size:12px;">(Flat B4)</span><br>
+                                <span style="font-size:14px; font-weight:bold; color:#198754;">৳ 2,00,000</span>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <a href="https://wa.me/01811000000" target="_blank" style="text-decoration:none; font-size:20px;" title="Send WhatsApp Reminder">💬</a>
+                                <a href="sms:01811000000" style="text-decoration:none; font-size:20px;" title="Send SMS Reminder">✉️</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1613,21 +2086,24 @@ function loadAccountsTab() {
         <div class="main-grid" style="margin-bottom: 24px;">
             <div class="card auto-refresh" style="margin-bottom:0;">
                 <h3 class="card-title">💸 Recent Collections <span class="live-dot"></span></h3>
-                <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
+                <div style="height: 220px; overflow-y: auto; padding-right: 10px;">
                     <div class="timeline-item tl-blue">
-                        <span class="detail-text" style="font-size:10px;">10 mins ago</span><br>
-                        <b style="font-size:13px; color:var(--text-main);">Rahim Uddin paid <span style="color:#198754;">৳ 50,000</span></b><br>
-                        <span style="font-size:11px; color:var(--text-muted);">via Bank Transfer (City Bank)</span>
+                        <span class="detail-text" style="font-size:11px;">10 mins ago</span><br>
+                        <b style="font-size:14px; color:var(--text-main);">Rahim Uddin paid <span style="color:#198754;">৳ 50,000</span></b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">via Bank Transfer (City Bank)</span><br>
+                        <span class="badge k-gray" style="margin-top:5px;">Receipt #1024</span>
                     </div>
                     <div class="timeline-item tl-green">
-                        <span class="detail-text" style="font-size:10px;">1 hour ago</span><br>
-                        <b style="font-size:13px; color:var(--text-main);">Karim Islam paid <span style="color:#198754;">৳ 1,00,000</span></b><br>
-                        <span style="font-size:11px; color:var(--text-muted);">via Cash (Receipt #1024)</span>
+                        <span class="detail-text" style="font-size:11px;">1 hour ago</span><br>
+                        <b style="font-size:14px; color:var(--text-main);">Karim Islam paid <span style="color:#198754;">৳ 1,00,000</span></b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">via Cash</span><br>
+                        <span class="badge k-gray" style="margin-top:5px;">Receipt #1025</span>
                     </div>
                     <div class="timeline-item tl-yellow">
-                        <span class="detail-text" style="font-size:10px;">3 hours ago</span><br>
-                        <b style="font-size:13px; color:var(--text-main);">Jamil Hossain paid <span style="color:#198754;">৳ 20,000</span></b><br>
-                        <span style="font-size:11px; color:var(--text-muted);">via Mobile Banking (Bkash)</span>
+                        <span class="detail-text" style="font-size:11px;">3 hours ago</span><br>
+                        <b style="font-size:14px; color:var(--text-main);">Jamil Hossain paid <span style="color:#198754;">৳ 20,000</span></b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">via Mobile Banking (Bkash)</span><br>
+                        <span class="badge k-gray" style="margin-top:5px;">Receipt #1026</span>
                     </div>
                 </div>
             </div>
@@ -1641,26 +2117,39 @@ function loadAccountsTab() {
                             <th style="padding-bottom:10px;">Project</th>
                             <th style="padding-bottom:10px; color:#198754;">Paid</th>
                             <th style="padding-bottom:10px; color:#dc3545;">Due</th>
+                            <th style="padding-bottom:10px; text-align:right;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="border-bottom:1px solid var(--border-soft); cursor:pointer;" title="Click to view Client Profile">
-                            <td style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;">Rahim</td>
+                        <tr style="border-bottom:1px solid var(--border-soft);">
+                            <td class="clickable-row" style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;" onclick="open360Profile('Rahim', '01700000000', 'Plot A12', 'Active', '1,50,000', '50,000', 'Hasan')">Rahim</td>
                             <td style="padding:12px 0;">Plot A12</td>
                             <td style="padding:12px 0; color:#198754; font-weight:bold;">1,50,000</td>
                             <td style="padding:12px 0; color:#dc3545; font-weight:bold;">50,000</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; justify-content:flex-end; gap:5px;">
+                                <button class="btn btn-blue btn-sm" style="font-size:11px; padding:4px 8px;">Ledger</button>
+                                <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">+ Pay</button>
+                            </td>
                         </tr>
-                        <tr style="border-bottom:1px solid var(--border-soft); cursor:pointer;" title="Click to view Client Profile">
-                            <td style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;">Karim</td>
+                        <tr style="border-bottom:1px solid var(--border-soft);">
+                            <td class="clickable-row" style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;" onclick="open360Profile('Karim', '01800000000', 'Plot B4', 'Active', '2,00,000', '0', 'Rakib')">Karim</td>
                             <td style="padding:12px 0;">Plot B4</td>
                             <td style="padding:12px 0; color:#198754; font-weight:bold;">2,00,000</td>
                             <td style="padding:12px 0; color:#dc3545; font-weight:bold;">0</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; justify-content:flex-end; gap:5px;">
+                                <button class="btn btn-blue btn-sm" style="font-size:11px; padding:4px 8px;">Ledger</button>
+                                <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">+ Pay</button>
+                            </td>
                         </tr>
-                        <tr style="cursor:pointer;" title="Click to view Client Profile">
-                            <td style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;">Nusrat</td>
+                        <tr>
+                            <td class="clickable-row" style="padding:12px 0; font-weight:bold; color:#0d6efd; text-decoration:underline;" onclick="open360Profile('Nusrat', '01900000000', 'Commercial', 'Active', '5,00,000', '10,00,000', 'Mutakkin')">Nusrat</td>
                             <td style="padding:12px 0;">Commercial</td>
                             <td style="padding:12px 0; color:#198754; font-weight:bold;">5,00,000</td>
                             <td style="padding:12px 0; color:#dc3545; font-weight:bold;">10,00,000</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; justify-content:flex-end; gap:5px;">
+                                <button class="btn btn-blue btn-sm" style="font-size:11px; padding:4px 8px;">Ledger</button>
+                                <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">+ Pay</button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -1686,6 +2175,7 @@ function loadAccountsTab() {
                             <td style="padding:12px 0; color:#f39c12; font-weight:bold;">৳ 15,000</td>
                             <td style="padding:12px 0; text-align:right;">
                                 <button class="btn btn-green btn-sm" style="padding:4px 8px; font-size:11px;">Approve</button>
+                                <button class="btn btn-red btn-sm" style="padding:4px 8px; font-size:11px;">Reject</button>
                             </td>
                         </tr>
                         <tr>
@@ -1694,6 +2184,7 @@ function loadAccountsTab() {
                             <td style="padding:12px 0; color:#f39c12; font-weight:bold;">৳ 12,000</td>
                             <td style="padding:12px 0; text-align:right;">
                                 <button class="btn btn-green btn-sm" style="padding:4px 8px; font-size:11px;">Approve</button>
+                                <button class="btn btn-red btn-sm" style="padding:4px 8px; font-size:11px;">Reject</button>
                             </td>
                         </tr>
                     </tbody>
@@ -1734,7 +2225,876 @@ function loadAccountsTab() {
     `;
 }
 
-/// ----------------------------------------------------
+// ----------------------------------------------------
+// 🎯 NEW: CR EXECUTIVE DASHBOARD (The Recovery Engine)
+// ----------------------------------------------------
+function loadCRTab() {
+    const appDiv = document.getElementById('app');
+    
+    appDiv.innerHTML = `
+    <div style="animation: fadeIn 0.5s;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 class="page-title" style="margin:0;">🎯 Client Recovery & Relations</h2>
+                <p class="detail-text" style="margin:0;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-green btn-sm">+ Log Payment</button>
+                <button class="btn btn-blue btn-sm">📅 Schedule Follow-up</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #0d6efd;">
+                <div class="kpi-label" style="color:#0d6efd;">Today's Follow-ups</div>
+                <div class="kpi-value" style="color:#0d6efd">12</div>
+                <div class="detail-text">Clients to contact today</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #dc3545;">
+                <div class="kpi-label" style="color:#dc3545;">High Risk Clients</div>
+                <div class="kpi-value" style="color:#dc3545">4</div>
+                <div class="detail-text">Overdue by more than 15 days</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #f39c12;">
+                <div class="kpi-label" style="color:#f39c12;">Total Overdue</div>
+                <div class="kpi-value" style="color:#f39c12">৳ 12.50L</div>
+                <div class="detail-text">Amount pending recovery</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #198754;">
+                <div class="kpi-label" style="color:#198754;">Recovered This Week</div>
+                <div class="kpi-value" style="color:#198754">৳ 3.50L</div>
+                <div class="detail-text">Successfully collected amount</div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #0d6efd;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📞 Today's Follow-up Tasks</h3>
+                    <span class="badge k-blue" style="background:#0d6efd; color:#fff;">12 Pending</span>
+                </div>
+                <div style="height: 220px; overflow-y: auto; padding-right: 5px;">
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Hasan Ali', '01711000000', 'Plot A12', 'Follow-up', '1,00,000', '50,000', 'Rakib')">Hasan Ali</b>
+                            <span style="font-size:11px; color:#dc3545; font-weight:bold;">Due: 11:00 AM</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Call for overdue payment (৳ 50,000)</div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">✔ Done</button>
+                            <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px; padding:4px;">Reschedule</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Nusrat Jahan', '01811000000', 'Commercial Space', 'Follow-up', '5,00,000', '0', 'Mutakkin')">Nusrat Jahan</b>
+                            <span style="font-size:11px; color:#f39c12; font-weight:bold;">Due: 03:00 PM</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Regular installment reminder</div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">✔ Done</button>
+                            <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px; padding:4px;">Reschedule</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
+                <h3 class="card-title">🚨 High Risk / Overdue Clients</h3>
+                <div style="height: 220px; overflow-y: auto; padding-right: 10px;">
+                    <div style="padding:12px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; border-radius:4px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Shafiq Islam', '01800000000', 'Cox Hotel', 'Overdue', '50,000', '2,00,000', 'Rakib')">Shafiq Islam</b>
+                            <span class="badge k-red" style="font-size:11px;">25 Days Overdue</span>
+                        </div>
+                        <div style="font-size:13px; font-weight:bold; color:#dc3545; margin-top:4px;">Amount: ৳ 2,00,000</div>
+                        <div style="margin-top:8px; display:flex; gap:10px;">
+                            <a href="tel:01800000000" style="text-decoration:none; font-size:18px;" title="Call">📱</a>
+                            <a href="https://wa.me/01800000000" target="_blank" style="text-decoration:none; font-size:18px;" title="WhatsApp">💬</a>
+                            <a href="sms:01800000000" style="text-decoration:none; font-size:18px;" title="SMS">✉️</a>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:12px; background:rgba(253, 126, 20, 0.05); border-left:3px solid #fd7e14; border-radius:4px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Overdue', '1,00,000', '1,50,000', 'Hasan')">Rahim Uddin</b>
+                            <span class="badge k-orange" style="background:#fd7e14; color:#fff; font-size:11px;">12 Days Overdue</span>
+                        </div>
+                        <div style="font-size:13px; font-weight:bold; color:#fd7e14; margin-top:4px;">Amount: ৳ 1,50,000</div>
+                        <div style="margin-top:8px; display:flex; gap:10px;">
+                            <a href="tel:01700000000" style="text-decoration:none; font-size:18px;" title="Call">📱</a>
+                            <a href="https://wa.me/01700000000" target="_blank" style="text-decoration:none; font-size:18px;" title="WhatsApp">💬</a>
+                            <a href="sms:01700000000" style="text-decoration:none; font-size:18px;" title="SMS">✉️</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">📝 Recent Client Interactions</h3>
+                <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
+                    <div class="timeline-item tl-blue">
+                        <span class="detail-text" style="font-size:10px;">Today, 10:30 AM</span><br>
+                        <b style="font-size:13px; color:var(--text-main);">Spoke with Rahim Uddin</b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">"Client requested 5 days extension due to personal reasons. Approved temporarily."</span>
+                    </div>
+                    <div class="timeline-item tl-green">
+                        <span class="detail-text" style="font-size:10px;">Yesterday, 04:15 PM</span><br>
+                        <b style="font-size:13px; color:var(--text-main);">WhatsApp sent to Karim</b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">"Sent payment link and receipt of last transaction."</span>
+                    </div>
+                    <div class="timeline-item tl-red">
+                        <span class="detail-text" style="font-size:10px;">2 Days Ago</span><br>
+                        <b style="font-size:13px; color:var(--text-main);">Failed to reach Shafiq</b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">"Phone switched off. Notified Sales Agent Rakib to visit site."</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">📈 My Recovery Performance</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; margin-top:20px;">
+                    <div>
+                        <div class="detail-text" style="font-weight:bold; margin-bottom:5px;">Target Recovery (Month)</div>
+                        <b style="font-size:22px; color:var(--text-muted);">৳ 20,00,000</b>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="detail-text" style="font-weight:bold; color:#198754; margin-bottom:5px;">Recovered So Far</div>
+                        <b style="font-size:28px; color:#198754;">৳ 13,00,000</b>
+                    </div>
+                </div>
+                <div class="bar-wrap" style="height:12px; background:rgba(25,135,84,0.2);">
+                    <div class="bar-fill" style="width:65%; background:#198754;"></div>
+                </div>
+                <div class="detail-text" style="text-align:right; margin-top:5px; font-weight:bold;">Recovery Rate: 65%</div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+// ----------------------------------------------------
+// 🏃 NEW: OFFICE ASSISTANT DASHBOARD (Logistics Hub)
+// ----------------------------------------------------
+function loadOfficeAssistantTab() {
+    const appDiv = document.getElementById('app');
+    
+    appDiv.innerHTML = `
+    <div style="animation: fadeIn 0.5s;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 class="page-title" style="margin:0;">🏃 Logistics & Task Control</h2>
+                <p class="detail-text" style="margin:0;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-green btn-sm">+ Update Task</button>
+                <button class="btn btn-blue btn-sm">📦 Deliver Item</button>
+                <button class="btn btn-gold btn-sm">🚚 Send Courier</button>
+                <button class="btn btn-gray btn-sm">⚡ Complete Errand</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #0d6efd;">
+                <div class="kpi-label" style="color:#0d6efd;">Today's Tasks</div>
+                <div class="kpi-value" style="color:#0d6efd">6</div>
+                <div class="detail-text">Pending daily duties</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #f39c12;">
+                <div class="kpi-label" style="color:#f39c12;">Pending Requisitions</div>
+                <div class="kpi-value" style="color:#f39c12">4</div>
+                <div class="detail-text">Items to purchase/collect</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #198754;">
+                <div class="kpi-label" style="color:#198754;">Courier Tasks</div>
+                <div class="kpi-value" style="color:#198754">2</div>
+                <div class="detail-text">To send or receive</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #dc3545;">
+                <div class="kpi-label" style="color:#dc3545;">Office Supplies Low</div>
+                <div class="kpi-value" style="color:#dc3545">3</div>
+                <div class="detail-text">Needs restock immediately</div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #0d6efd;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📋 Daily Task List</h3>
+                    <span class="badge k-blue" style="background:#0d6efd; color:#fff;">6 Pending</span>
+                </div>
+                <div style="height: 220px; overflow-y: auto; padding-right: 5px;">
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="font-size:14px; color:var(--text-main);">Deliver agreement to client</b>
+                            <span class="badge k-red">High Priority</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Location: Gulshan 1, Client: Rahim</div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">✔ Done</button>
+                            <button class="btn btn-blue btn-sm" style="flex:1; font-size:11px; padding:4px;">▶ Start</button>
+                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px; padding:4px;">⏸ Delay</button>
+                        </div>
+                    </div>
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="font-size:14px; color:var(--text-main);">Bank Deposit (City Bank)</b>
+                            <span class="badge k-yellow">Medium</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Deposit ৳50,000 cash to main branch</div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">✔ Done</button>
+                            <button class="btn btn-blue btn-sm" style="flex:1; font-size:11px; padding:4px;">▶ Start</button>
+                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px; padding:4px;">⏸ Delay</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #f39c12;">
+                <h3 class="card-title">🛒 Office Requisition Tasks</h3>
+                <div style="height: 220px; overflow-y: auto; padding-right: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div>
+                            <b style="font-size:13px; color:var(--text-main);">Printer Paper (A4)</b><br>
+                            <span style="font-size:11px; color:var(--text-muted);">Req by: Sales Dept</span>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-gold btn-sm" style="font-size:11px; padding:4px 8px;">Purchase</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div>
+                            <b style="font-size:13px; color:var(--text-main);">Office Tea & Sugar</b><br>
+                            <span style="font-size:11px; color:var(--text-muted);">Req by: Admin</span>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">Delivered</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div>
+                            <b style="font-size:13px; color:var(--text-main);">Stationery & Pens</b><br>
+                            <span style="font-size:11px; color:var(--text-muted);">Req by: Accounts</span>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <span class="badge k-gray">Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">🚚 Courier & Document Tracking</h3>
+                <div style="height: 150px; overflow-y: auto; padding-right: 10px;">
+                    <div class="timeline-item tl-blue">
+                        <b style="font-size:13px; color:var(--text-main);">Courier sent to Chittagong</b><br>
+                        <span class="detail-text" style="font-size:11px;">Sundarban Courier - Tracking #8847</span>
+                    </div>
+                    <div class="timeline-item tl-green">
+                        <b style="font-size:13px; color:var(--text-main);">Document received from Rajshahi</b><br>
+                        <span class="detail-text" style="font-size:11px;">Handed over to Accounts dept.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">📦 Office Supplies Monitor</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(220, 53, 69, 0.05); border-radius:6px; border-left:3px solid #dc3545; margin-bottom:8px;">
+                    <b style="font-size:13px; color:var(--text-main);">Printer Paper</b>
+                    <span class="badge k-red">Low</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(241, 196, 15, 0.05); border-radius:6px; border-left:3px solid #f1c40f; margin-bottom:8px;">
+                    <b style="font-size:13px; color:var(--text-main);">Stationery</b>
+                    <span class="badge k-yellow">Low</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(25, 135, 84, 0.05); border-radius:6px; border-left:3px solid #198754;">
+                    <b style="font-size:13px; color:var(--text-main);">Tea & Coffee</b>
+                    <span class="badge k-green">OK</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">👥 Visitor Assistance</h3>
+                <div style="border-left: 2px solid #0d6efd; padding-left: 15px; margin-bottom: 15px;">
+                    <span class="detail-text" style="font-size:11px; font-weight:bold;">11:30 AM (Expected)</span><br>
+                    <b style="font-size:14px; color:var(--text-main);">Client: Rahim Uddin</b><br>
+                    <span style="font-size:12px; color:var(--text-muted);">Action: Receive client & Serve Tea</span>
+                </div>
+                <div style="border-left: 2px solid #198754; padding-left: 15px;">
+                    <span class="detail-text" style="font-size:11px; font-weight:bold;">02:00 PM</span><br>
+                    <b style="font-size:14px; color:var(--text-main);">Meeting Room Prep</b><br>
+                    <span style="font-size:12px; color:var(--text-muted);">Sales Team Meeting</span>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">⚡ Recent Activities & Errands</h3>
+                <div style="height: 150px; overflow-y: auto; padding-right: 10px;">
+                    <div class="timeline-item tl-green">
+                        <b style="font-size:13px; color:var(--text-main);">Bank deposit completed</b><br>
+                        <span class="detail-text" style="font-size:10px;">City Bank - 10:00 AM</span>
+                    </div>
+                    <div class="timeline-item tl-blue">
+                        <b style="font-size:13px; color:var(--text-main);">Document delivered</b><br>
+                        <span class="detail-text" style="font-size:10px;">To Client Hasan - Yesterday</span>
+                    </div>
+                    <div class="timeline-item tl-yellow">
+                        <b style="font-size:13px; color:var(--text-main);">Utility bill payment</b><br>
+                        <span class="detail-text" style="font-size:10px;">Electricity bill cleared - Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+// ============================================================================
+// 🛎️ NEW: FRONT DESK / RECEPTION DASHBOARD (The Reception Hub)
+// ============================================================================
+function loadFrontDeskTab() {
+    const appDiv = document.getElementById('app');
+    
+    appDiv.innerHTML = `
+    <div style="animation: fadeIn 0.5s;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 class="page-title" style="margin:0;">🛎️ Front Desk Control Center</h2>
+                <p class="detail-text" style="margin:0;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-green btn-sm" onclick="switchTab('crm')">➕ Add New Lead</button>
+                <button class="btn btn-blue btn-sm">📝 Register Visitor</button>
+                <button class="btn btn-gold btn-sm">📅 Schedule Visit</button>
+                <button class="btn btn-gray btn-sm">📞 Log Incoming Call</button>
+                <button class="btn btn-orange btn-sm" style="background:#fd7e14; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:12px;">+ Create Follow-up</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #0d6efd;">
+                <div class="kpi-label" style="color:#0d6efd;">New Leads Today</div>
+                <div class="kpi-value" style="color:#0d6efd">8</div>
+                <div class="detail-text">Captured at front desk</div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #198754;">
+                <div class="kpi-label" style="color:#198754;">Visitors Today</div>
+                <div class="kpi-value" style="color:#198754">5</div>
+                <div class="detail-text">Walk-ins & scheduled</div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #f39c12;">
+                <div class="kpi-label" style="color:#f39c12;">Calls Received</div>
+                <div class="kpi-value" style="color:#f39c12">12</div>
+                <div class="detail-text">Inbound inquiries</div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #dc3545;">
+                <div class="kpi-label" style="color:#dc3545;">Visits Scheduled</div>
+                <div class="kpi-value" style="color:#dc3545">4</div>
+                <div class="detail-text">For today & tomorrow</div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #0d6efd;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📅 Upcoming Visits</h3>
+                    <span class="badge k-blue" style="background:#0d6efd; color:#fff;">2 Scheduled</span>
+                </div>
+                <div style="height: 180px; overflow-y: auto; padding-right: 5px;">
+                    
+                    <div class="clickable-row" style="border-left: 3px solid #0d6efd; padding-left: 15px; margin-bottom: 15px; background:rgba(13,110,253,0.05); padding:10px; border-radius:4px;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Site Visit', '0', '0', 'Hasan')">
+                        <span class="detail-text" style="font-size:11px; font-weight:bold; color:#0d6efd;">Tomorrow, 10:30 AM</span><br>
+                        <b style="font-size:14px; color:var(--text-main);">Client: Rahim Uddin</b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">Purpose: Plot Visit | Agent: Hasan</span>
+                    </div>
+                    
+                    <div class="clickable-row" style="border-left: 3px solid #198754; padding-left: 15px; background:rgba(25,135,84,0.05); padding:10px; border-radius:4px;" onclick="open360Profile('Karim Islam', '01800000000', 'Flat B4', 'Meeting', '0', '0', 'Rakib')">
+                        <span class="detail-text" style="font-size:11px; font-weight:bold; color:#198754;">Friday, 04:00 PM</span><br>
+                        <b style="font-size:14px; color:var(--text-main);">Client: Karim Islam</b><br>
+                        <span style="font-size:12px; color:var(--text-muted);">Purpose: Office Meeting | Agent: Rakib</span>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #f39c12;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📞 Today's Follow-ups</h3>
+                    <span class="badge k-yellow" style="font-size:12px;">3 Pending</span>
+                </div>
+                <div style="height: 180px; overflow-y: auto; padding-right: 5px;">
+                    
+                    <div style="padding:10px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:var(--text-main);">Rahim</b>
+                            <span style="font-size:11px; color:#f39c12; font-weight:bold;">Call Reminder</span>
+                        </div>
+                        <div style="margin-top:5px; display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="font-size:10px; padding:3px 6px;">✔ Done</button>
+                            <a href="tel:01700000000" class="btn btn-blue btn-sm" style="font-size:10px; padding:3px 6px; text-decoration:none;">Call Now</a>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:10px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:var(--text-main);">Karim</b>
+                            <span style="font-size:11px; color:#f39c12; font-weight:bold;">Visit Confirmation</span>
+                        </div>
+                        <div style="margin-top:5px; display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="font-size:10px; padding:3px 6px;">✔ Done</button>
+                            <a href="https://wa.me/01800000000" target="_blank" class="btn btn-gold btn-sm" style="font-size:10px; padding:3px 6px; text-decoration:none;">WhatsApp</a>
+                        </div>
+                    </div>
+
+                    <div style="padding:10px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:var(--text-main);">Nusrat</b>
+                            <span style="font-size:11px; color:#dc3545; font-weight:bold;">Payment Reminder</span>
+                        </div>
+                        <div style="margin-top:5px; display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="font-size:10px; padding:3px 6px;">✔ Done</button>
+                            <a href="tel:01900000000" class="btn btn-blue btn-sm" style="font-size:10px; padding:3px 6px; text-decoration:none;">Call Now</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #198754;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📋 Today's Visitor Log</h3>
+                    <span class="badge k-green">3 Visitors</span>
+                </div>
+                <div style="height: 250px; overflow-y: auto; padding-right: 5px;">
+                    
+                    <div style="padding:12px; background:rgba(25, 135, 84, 0.05); border-left:3px solid #198754; border-radius:4px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Rahim Uddin', '01700000000', 'Plot A12', 'Meeting', '0', '0', 'Sales Team')">Rahim Uddin</b>
+                            <span style="font-size:11px; font-weight:bold; color:var(--text-muted);">10:30 AM</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Purpose: Sales Meeting | Status: <span style="color:#198754; font-weight:bold;">In Office</span></div>
+                        <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="btn btn-blue btn-sm" style="flex:1; font-size:11px; padding:4px;">🖨️ Print Pass</button>
+                            <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px; padding:4px;">🔔 Notify Agent</button>
+                            <button class="btn btn-gray btn-sm" style="flex:1; font-size:11px; padding:4px;">Check-out</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:12px; background:rgba(241, 196, 15, 0.05); border-left:3px solid #f1c40f; border-radius:4px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Karim Islam', '01800000000', 'Flat B4', 'Inquiry', '0', '0', 'Front Desk')">Karim Islam</b>
+                            <span style="font-size:11px; font-weight:bold; color:var(--text-muted);">12:00 PM</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Purpose: Project Inquiry | Status: <span style="color:#f39c12; font-weight:bold;">Waiting</span></div>
+                        <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="btn btn-blue btn-sm" style="flex:1; font-size:11px; padding:4px;">🖨️ Print Pass</button>
+                            <button class="btn btn-gold btn-sm" style="flex:1; font-size:11px; padding:4px;">Assign Room</button>
+                        </div>
+                    </div>
+
+                    <div style="padding:12px; background:rgba(13, 110, 253, 0.05); border-left:3px solid #0d6efd; border-radius:4px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Nusrat', '01900000000', 'Commercial', 'Payment', '5,00,000', '0', 'Accounts')">Nusrat</b>
+                            <span style="font-size:11px; font-weight:bold; color:var(--text-muted);">03:00 PM</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Purpose: Payment | Status: <span style="color:#0d6efd; font-weight:bold;">Expected</span></div>
+                        <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="btn btn-green btn-sm" style="flex:1; font-size:11px; padding:4px;">Check-in</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
+                <h3 class="card-title">📞 Incoming Call Log</h3>
+                <div style="height: 250px; overflow-y: auto; padding-right: 10px;">
+                    
+                    <div style="padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:var(--text-main);">01711-XXXXXX (New)</b>
+                            <span style="font-size:11px; color:var(--text-muted);">Just Now</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Inquiry: General Info</div>
+                        <div style="margin-top:8px; display:flex; gap:5px;">
+                            <button class="btn btn-green btn-sm" style="font-size:10px; padding:4px 8px;">+ Create Lead</button>
+                            <button class="btn btn-blue btn-sm" style="font-size:10px; padding:4px 8px;">Forward to Sales</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b class="clickable-row" style="font-size:13px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Rahim', '01700000000', 'Plot A12', 'Contacted', '0', '0', 'Front Desk')">Rahim (Existing)</b>
+                            <span style="font-size:11px; color:var(--text-muted);">1 hour ago</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Inquiry: Project details</div>
+                        <div style="margin-top:8px; display:flex; gap:5px;">
+                            <button class="btn btn-gold btn-sm" style="font-size:10px; padding:4px 8px;">Schedule Visit</button>
+                        </div>
+                    </div>
+
+                    <div style="padding:12px; border-bottom:1px solid var(--border-soft);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b class="clickable-row" style="font-size:13px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('Karim', '01800000000', 'Plot B4', 'Active', '0', '0', 'Accounts')">Karim (Existing)</b>
+                            <span style="font-size:11px; color:var(--text-muted);">2 hours ago</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Question regarding payment method.</div>
+                        <div style="margin-top:8px; display:flex; gap:5px;">
+                            <button class="btn btn-gray btn-sm" style="font-size:10px; padding:4px 8px; background:#6c757d; color:#fff;">Forward to Accounts</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">📊 Lead Pipeline Summary</h3>
+                <div style="display:flex; gap:10px; text-align:center; overflow-x:auto; padding-bottom:10px;">
+                    <div style="flex:1; min-width:80px; background:rgba(13, 110, 253, 0.1); border:1px solid #0d6efd; padding:15px; border-radius:6px;">
+                        <b style="font-size:24px; color:#0d6efd;">12</b><br><span style="font-size:12px; font-weight:bold; color:var(--text-main);">New Leads</span>
+                    </div>
+                    <div style="flex:1; min-width:80px; background:rgba(23, 162, 184, 0.1); border:1px solid #17a2b8; padding:15px; border-radius:6px;">
+                        <b style="font-size:24px; color:#17a2b8;">8</b><br><span style="font-size:12px; font-weight:bold; color:var(--text-main);">Contacted</span>
+                    </div>
+                    <div style="flex:1; min-width:80px; background:rgba(241, 196, 15, 0.1); border:1px solid #f1c40f; padding:15px; border-radius:6px;">
+                        <b style="font-size:24px; color:#f39c12;">5</b><br><span style="font-size:12px; font-weight:bold; color:var(--text-main);">Visits Set</span>
+                    </div>
+                    <div style="flex:1; min-width:80px; background:rgba(25, 135, 84, 0.1); border:1px solid #198754; padding:15px; border-radius:6px;">
+                        <b style="font-size:24px; color:#198754;">2</b><br><span style="font-size:12px; font-weight:bold; color:var(--text-main);">Deals Won</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">⚡ Recent Activities</h3>
+                <div style="height: 150px; overflow-y: auto; padding-right: 10px;">
+                    <div class="timeline-item tl-green">
+                        <b style="font-size:13px; color:var(--text-main);">Visitor Registered</b><br>
+                        <span class="detail-text" style="font-size:10px;">Rahim Uddin (Check-in: 10:30 AM)</span>
+                    </div>
+                    <div class="timeline-item tl-blue">
+                        <b style="font-size:13px; color:var(--text-main);">Call Forwarded</b><br>
+                        <span class="detail-text" style="font-size:10px;">Forwarded lead call to Sales Agent Rakib</span>
+                    </div>
+                    <div class="timeline-item tl-yellow">
+                        <b style="font-size:13px; color:var(--text-main);">New Lead Added</b><br>
+                        <span class="detail-text" style="font-size:10px;">Entered walk-in lead details (1 hour ago)</span>
+                    </div>
+                    <div class="timeline-item tl-red">
+                        <b style="font-size:13px; color:var(--text-main);">Visit Scheduled</b><br>
+                        <span class="detail-text" style="font-size:10px;">Scheduled Karim for tomorrow 3 PM</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    `;
+}
+
+// ============================================================================
+// 🏢 NEW: ADMIN & HR LOGISTIC (Company Control Center)
+// ============================================================================
+function loadAdminControlCenterTab() {
+    const appDiv = document.getElementById('app');
+    
+    appDiv.innerHTML = `
+    <div style="animation: fadeIn 0.5s;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 class="page-title" style="margin:0;">🏢 Company Control Center</h2>
+                <p class="detail-text" style="margin:0;">Role: <b>${CURRENT_USER.role}</b> | Dept: <b>${CURRENT_USER.department}</b></p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-green btn-sm" onclick="switchTab('hr')">✅ Approve Leave</button>
+                <button class="btn btn-blue btn-sm">📋 Add Task</button>
+                <button class="btn btn-gold btn-sm">📅 Book Room</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #0d6efd;">
+                <div class="kpi-label" style="color:#0d6efd;">Employees Present</div>
+                <div class="kpi-value" style="color:#0d6efd">42 <span style="font-size:16px; color:var(--text-muted);">/ 45</span></div>
+                <div class="detail-text">Today's Attendance</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #f39c12;">
+                <div class="kpi-label" style="color:#f39c12;">Pending Requisitions</div>
+                <div class="kpi-value" style="color:#f39c12">7</div>
+                <div class="detail-text">Awaiting Admin Approval</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #dc3545;">
+                <div class="kpi-label" style="color:#dc3545;">Open Incidents</div>
+                <div class="kpi-value" style="color:#dc3545">2</div>
+                <div class="detail-text">Maintenance & IT Issues</div>
+            </div>
+            <div class="card" style="margin-bottom:0; border-bottom: 4px solid #198754;">
+                <div class="kpi-label" style="color:#198754;">Expected Visitors</div>
+                <div class="kpi-value" style="color:#198754">5</div>
+                <div class="detail-text">Scheduled for today</div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">🗺️ Employee Attendance Heatmap</h3>
+                    <button class="btn btn-gray btn-sm">View All</button>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div style="padding:10px; background:rgba(25, 135, 84, 0.05); border-left:3px solid #198754; flex:1; border-radius:4px;">
+                        <b style="font-size:14px; color:var(--text-main);">Present (42)</b>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">On-time: 38 | Late: 4</div>
+                    </div>
+                    <div style="padding:10px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545; flex:1; border-radius:4px;">
+                        <b style="font-size:14px; color:var(--text-main);">Absent (3)</b>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">On Leave: 2 | Uninformed: 1</div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; margin-top:15px;">
+                    ${Array(42).fill('<div style="height:15px; background:#198754; border-radius:2px;" title="Present"></div>').join('')}
+                    ${Array(3).fill('<div style="height:15px; background:#dc3545; border-radius:2px;" title="Absent"></div>').join('')}
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
+                <h3 class="card-title">🚨 Live HR & Admin Alerts</h3>
+                <div style="height: 180px; overflow-y: auto; padding-right: 5px;">
+                    <div style="padding:10px; border-radius:6px; margin-bottom:8px; background:rgba(220, 53, 69, 0.05); border-left:3px solid #dc3545;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:#dc3545;">Low Office Supplies</b>
+                            <span style="font-size:11px; color:var(--text-muted);">10 mins ago</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-main); margin-top:4px;">Printer paper and stationery running low.</div>
+                    </div>
+                    <div style="padding:10px; border-radius:6px; margin-bottom:8px; background:rgba(241, 196, 15, 0.05); border-left:3px solid #f1c40f;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:#f39c12;">Leave Request Pending</b>
+                            <span style="font-size:11px; color:var(--text-muted);">1 hr ago</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-main); margin-top:4px;">Hasan (Sales) requested 2 days casual leave.</div>
+                        <div style="margin-top:5px;"><button class="btn btn-gold btn-sm" style="font-size:10px; padding:2px 5px;">Review</button></div>
+                    </div>
+                    <div style="padding:10px; border-radius:6px; margin-bottom:8px; background:rgba(13, 110, 253, 0.05); border-left:3px solid #0d6efd;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b style="font-size:13px; color:#0d6efd;">Visitor Waiting</b>
+                            <span style="font-size:11px; color:var(--text-muted);">Just Now</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-main); margin-top:4px;">Client at reception for Mutakkin.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0; overflow-x:auto;">
+                <h3 class="card-title">🛒 Office Requisition Management</h3>
+                <table style="width:100%; text-align:left; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border-soft);">
+                            <th style="padding-bottom:10px;">Item Requested</th>
+                            <th style="padding-bottom:10px;">Department</th>
+                            <th style="padding-bottom:10px;">Amount</th>
+                            <th style="padding-bottom:10px; text-align:right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid var(--border-soft);">
+                            <td style="padding:12px 0; font-weight:bold; color:var(--text-main);">Printer Paper</td>
+                            <td style="padding:12px 0;">Marketing</td>
+                            <td style="padding:12px 0; color:#dc3545; font-weight:bold;">৳ 2,500</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; gap:5px; justify-content:flex-end;">
+                                <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">Approve</button>
+                                <button class="btn btn-red btn-sm" style="font-size:11px; padding:4px 8px;">Reject</button>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-soft);">
+                            <td style="padding:12px 0; font-weight:bold; color:var(--text-main);">Office Chair</td>
+                            <td style="padding:12px 0;">Sales</td>
+                            <td style="padding:12px 0; color:#dc3545; font-weight:bold;">৳ 8,000</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; gap:5px; justify-content:flex-end;">
+                                <button class="btn btn-blue btn-sm" style="font-size:11px; padding:4px 8px;">Send to Purchase</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:12px 0; font-weight:bold; color:var(--text-main);">Tea Supplies</td>
+                            <td style="padding:12px 0;">Office</td>
+                            <td style="padding:12px 0; color:#dc3545; font-weight:bold;">৳ 1,500</td>
+                            <td style="padding:12px 0; text-align:right; display:flex; gap:5px; justify-content:flex-end;">
+                                <button class="btn btn-green btn-sm" style="font-size:11px; padding:4px 8px;">Approve</button>
+                                <button class="btn btn-red btn-sm" style="font-size:11px; padding:4px 8px;">Reject</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="margin-bottom:0; background:linear-gradient(135deg, var(--card-bg) 0%, rgba(220, 53, 69, 0.03) 100%);">
+                <h3 class="card-title">📉 Office Expense Tracker</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <div>
+                        <div class="detail-text" style="font-weight:bold; margin-bottom:5px;">Budget limit (Monthly)</div>
+                        <b style="font-size:22px; color:var(--text-muted);">৳ 50,000</b>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="detail-text" style="font-weight:bold; color:#dc3545; margin-bottom:5px;">Spent So Far</div>
+                        <b style="font-size:28px; color:#dc3545;">৳ 32,500</b>
+                    </div>
+                </div>
+                <div class="bar-wrap" style="height:12px; background:rgba(220,53,69,0.2);">
+                    <div class="bar-fill" style="width:65%; background:#dc3545;"></div>
+                </div>
+                <div class="detail-text" style="text-align:right; margin-top:5px; font-weight:bold;">65% Budget Utilized</div>
+                
+                <div style="margin-top:20px; font-size:12px; color:var(--text-main); line-height:1.8;">
+                    <div style="display:flex; justify-content:space-between;"><span>Office Supplies:</span> <b>৳ 12,000</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Maintenance Cost:</span> <b>৳ 15,500</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Utilities:</span> <b>৳ 5,000</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #0d6efd;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">📋 Employee Task Board</h3>
+                    <button class="btn btn-blue btn-sm">Assign Task</button>
+                </div>
+                <div style="height: 180px; overflow-y: auto; padding-right: 5px;">
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="font-size:14px; color:var(--text-main);">Courier Delivery (Bank)</b>
+                            <span class="badge k-yellow">In Progress</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted);">Assigned to: <b>Office Assistant (Riyaz)</b></div>
+                    </div>
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="font-size:14px; color:var(--text-main);">Prepare Meeting Room 1</b>
+                            <span class="badge k-gray">Pending</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted);">Assigned to: <b>Front Desk (Laboni)</b></div>
+                    </div>
+                    <div style="padding:10px; border:1px solid var(--border-soft); border-radius:6px; margin-bottom:10px; background:#f8f9fa;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="font-size:14px; color:var(--text-main);">Collect Documents</b>
+                            <span class="badge k-green">Completed</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted);">Assigned to: <b>Logistics Team</b></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0; border-top: 4px solid #dc3545;">
+                <h3 class="card-title">⚠️ Incident / Issue Monitor</h3>
+                <div style="height: 180px; overflow-y: auto; padding-right: 10px;">
+                    <div class="timeline-item tl-green">
+                        <b style="font-size:13px; color:var(--text-main);">Internet Down</b><br>
+                        <span class="detail-text" style="font-size:11px;">Resolved at 10:45 AM</span>
+                    </div>
+                    <div class="timeline-item tl-red">
+                        <b style="font-size:13px; color:var(--text-main);">Printer Problem (Accounts)</b><br>
+                        <span class="detail-text" style="font-size:11px; color:#dc3545; font-weight:bold;">Pending Technician</span>
+                    </div>
+                    <div class="timeline-item tl-yellow">
+                        <b style="font-size:13px; color:var(--text-main);">AC Repair (Meeting Room 2)</b><br>
+                        <span class="detail-text" style="font-size:11px;">Scheduled for 4:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid" style="margin-bottom: 24px;">
+            <div class="card" style="margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 class="card-title" style="margin:0; border:none;">🚪 Meeting Room Manager</h3>
+                    <span class="badge k-blue">2 Rooms</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="padding:12px; border:1px solid #dc3545; border-radius:6px; background:rgba(220, 53, 69, 0.05);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b style="font-size:14px; color:var(--text-main);">Meeting Room 1</b>
+                            <span class="badge k-red">Booked (11 AM - 1 PM)</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Booked by: Sales Team (Client Visit)</div>
+                    </div>
+                    <div style="padding:12px; border:1px solid #198754; border-radius:6px; background:rgba(25, 135, 84, 0.05);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <b style="font-size:14px; color:var(--text-main);">Meeting Room 2</b>
+                            <span class="badge k-green">Available</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Ready for booking</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <h3 class="card-title">📦 Office Resource Monitoring</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(220, 53, 69, 0.05); border-radius:6px; border-left:3px solid #dc3545; margin-bottom:10px;">
+                    <b style="font-size:14px; color:var(--text-main);">Printer Paper</b>
+                    <span class="badge k-red">Low (Order Now)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(25, 135, 84, 0.05); border-radius:6px; border-left:3px solid #198754; margin-bottom:10px;">
+                    <b style="font-size:14px; color:var(--text-main);">Office Tea & Sugar</b>
+                    <span class="badge k-green">OK</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(241, 196, 15, 0.05); border-radius:6px; border-left:3px solid #f1c40f;">
+                    <b style="font-size:14px; color:var(--text-main);">Stationery (Pens, Files)</b>
+                    <span class="badge k-yellow">Low</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:0; border-top: 4px solid #17a2b8;">
+            <h3 class="card-title">🌐 Inter-Departmental Productivity Score</h3>
+            <div style="display:flex; gap:15px; text-align:center; overflow-x:auto; padding-bottom:10px;">
+                <div style="flex:1; min-width:120px; background:var(--bg-light); border:1px solid var(--border-soft); padding:15px; border-radius:8px;">
+                    <span style="font-size:24px;">📢</span><br>
+                    <b style="font-size:14px; color:var(--text-main); margin-top:5px; display:block;">Marketing</b>
+                    <span style="font-size:12px; color:#198754; font-weight:bold;">5 Campaigns Active</span>
+                </div>
+                <div style="flex:1; min-width:120px; background:var(--bg-light); border:1px solid var(--border-soft); padding:15px; border-radius:8px;">
+                    <span style="font-size:24px;">💼</span><br>
+                    <b style="font-size:14px; color:var(--text-main); margin-top:5px; display:block;">Sales</b>
+                    <span style="font-size:12px; color:#0d6efd; font-weight:bold;">20 Active Leads</span>
+                </div>
+                <div style="flex:1; min-width:120px; background:var(--bg-light); border:1px solid var(--border-soft); padding:15px; border-radius:8px;">
+                    <span style="font-size:24px;">🏦</span><br>
+                    <b style="font-size:14px; color:var(--text-main); margin-top:5px; display:block;">Accounts</b>
+                    <span style="font-size:12px; color:#f39c12; font-weight:bold;">3 Payments Pending</span>
+                </div>
+                <div style="flex:1; min-width:120px; background:var(--bg-light); border:1px solid var(--border-soft); padding:15px; border-radius:8px;">
+                    <span style="font-size:24px;">🎯</span><br>
+                    <b style="font-size:14px; color:var(--text-main); margin-top:5px; display:block;">CR & Recovery</b>
+                    <span style="font-size:12px; color:#dc3545; font-weight:bold;">5 Overdue Clients</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+// ----------------------------------------------------
 // 📄 REPORTS MODULE FRONTEND (Advanced PDF & Filters)
 // ----------------------------------------------------
 async function loadReportsTab() {
@@ -2140,7 +3500,7 @@ function renderSalesKanban(data) {
             
             cols[l.status] += `
             <div class="kanban-card ${colorCls}">
-                <b style="font-size:14px; color:var(--text-main);">${l.name}</b><br>
+                <b class="clickable-row" style="font-size:14px; color:var(--text-main); text-decoration:underline;" onclick="open360Profile('${l.name}', '${l.phone}', '${l.product}', '${l.status}', '0', '0', '${CURRENT_USER.name}')">${l.name}</b><br>
                 <div class="wings-btn" onclick="toggleWings('${l.id}')">📞 ${l.phone}</div><br>
                 <div class="detail-text" style="margin-bottom:8px;">📝 ${l.remarks || 'No remarks'}</div>
                 
