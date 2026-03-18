@@ -3,9 +3,27 @@
 // ============================================================================
 
 // ✅ তোমার Google Script Web App URL এখানে বসাও
-const API_URL = "https://script.google.com/macros/s/AKfycbwwsfoKhwGnU4-12V-32Nufn7c7NtoPpkgbW9rpEDEwcXgx7aMntSLK6pY3Bd0ETO6Z/exec";
+// const API_URL = "https://script.google.com/macros/s/AKfycbwwsfoKhwGnU4-12V-32Nufn7c7NtoPpkgbW9rpEDEwcXgx7aMntSLK6pY3Bd0ETO6Z/exec";
 
-let CURRENT_USER = null;
+
+const supabaseUrl = 'https://sgrwxyvgnahofdknbgon.supabase.co';
+const supabaseKey = 'sb_publishable_dkz3Xg7Ouo-Q93dr3qNdvQ_u-1c0Eb4'; 
+
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+async function testConnection() {
+  console.log("Supabase এর সাথে কানেক্ট করার চেষ্টা করছি...");
+  
+  const { data, error } = await supabaseClient.auth.getSession();
+  
+  if (error) {
+    console.error("বন্ধু, কোথাও একটা ভুল হয়েছে:", error.message);
+  } else {
+    console.log("আলহামদুলিল্লাহ! ডাটাবেস একদম পারফেক্টলি কানেক্ট হয়েছে।", data);
+  }
+}
+
+testConnection();
 
 // ============================================================================
 // 🎨 MULTI-THEME ENGINE
