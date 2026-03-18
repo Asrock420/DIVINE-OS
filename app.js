@@ -6920,6 +6920,45 @@ async function handleRequisition(id, status, btn) {
     fetchCompanyAdminTab(); // Refresh dashboard KPIs
 }
 
+// ==========================================
+// 🔐 SECURE LOGIN SYSTEM (SaaS Auth)
+// ==========================================
+
+const loginForm = document.getElementById('loginForm');
+const phoneInput = document.getElementById('p');
+const passwordInput = document.getElementById('x');
+
+if (loginForm) {
+  loginForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const phone = phoneInput.value;
+    const password = passwordInput.value;
+
+    const dummyEmail = phone + "@divineos.com"; 
+
+    console.log("ডাটাবেসে ইউজারের তথ্য চেক করা হচ্ছে...");
+
+    // Supabase-এর লগিন ম্যাজিক
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: dummyEmail,
+      password: password,
+    });
+
+    if (error) {
+      console.error("লগিন ফেইলড:", error.message);
+      
+      alert("ভুল ফোন নাম্বার বা পাসওয়ার্ড! আবার চেষ্টা করো।"); 
+    } else {
+      console.log("আলহামদুলিল্লাহ! লগিন সফল!", data);
+      
+      localStorage.setItem('divine_user_id', data.user.id);
+
+      window.location.href = "dashboard.html"; 
+    }
+  });
+}
+
 // ============================================================================
 // END OF APP.JS - DIVINE OS ENTERPRISE SYSTEM
 // All 6449+ original logic lines, structures, and HTML templates preserved.
